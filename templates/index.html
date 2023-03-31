@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<link rel="stylesheet" href="//stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+		<style>
+			.bd-placeholder-img {
+				font-size: 1.125rem;
+				text-anchor: start;
+			}
+
+			@media (min-width: 768px) {
+				.bd-placeholder-img-lg {
+					font-size: 150%;
+				}
+			}
+		</style>
+		<link rel="stylesheet" href="style.css">
+
+		<title>YOLOv5 Object Detection - Demo</title>
+	</head>
+	<body>
+		<form method=post enctype=multipart/form-data>
+			<div style= "height:50px"></div>
+			<div class="infield">
+				<div class="incontainer">
+					<!-- <h3 style= "color:#030d9b"><i></i></h3>
+					<hr> -->
+					<!-- <div style="height:50px"></div> -->
+					<h5>Choose image to detect: </h5>
+					<input type="file" name="file" class="form-control-file" id="inputfile">
+				</div>
+				
+				<div class="incontainer">
+					<!-- <div style= "height:40px"></div> -->
+					<h5>Select YOLOv5 model: </h5>
+					<select name="model_choice" id ="model_choice"></select>
+					<script>
+					  // make the API call to fetch the list of models
+					fetch('/model')
+					  .then(response => response.json())
+					  .then(data => {
+						// update the options of the select element with the fetched data
+						const selectElement = document.getElementById('model_choice');
+						data.forEach(model => {
+						  const optionElement = document.createElement('option');
+						  optionElement.textContent = model;
+						  selectElement.appendChild(optionElement);
+						});
+					  })
+					  .catch(error => console.error(error));
+					</script>
+				</div>
+				<!-- <div style= "height:50px"></div> -->
+				<!-- <div style= "margin-right:50px"> -->
+				<button class="btn btn-lg btn-primary btn-block" type="submit" style= "margin-right:10px">Submit</button>
+				<!-- </div> -->
+			</div>
+			<div class="outfield">
+				<div style= "height:10px"></div>
+				<div class="imgout">
+					<img id="ItemPreview" style="max-width: 900px; max-height: 658px;" onerror="this.style.display='none';" alt="Not found" src="data:image/png;base64, {{ responsed}}" style="height:auto; max-width: 80%; max-height: 800px;">
+				</div>
+				<div class="infoout">
+					<h5>Detected objects:</h5>
+					<div class="infoout_text">
+						<div>{{ output_str | safe}}</div>
+					</div>
+					<h5>JSON output:</h5>
+					<div class="infoout_json">
+						<pre>{{ json_out }}</pre>
+					</div>
+					<div style= "height:20px"></div>
+					<button class="btn btn-lg btn-primary btn-block" onclick="downloadJSON()">Download JSON</button>
+				</div>
+			</div>
+			<div style= "height:150px"></div>
+			<p align="center">Demo MLOps</p>
+    </form>
+		<script src="//code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+		<script src="//stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+		<script type="text/javascript">
+			$('#inputfile').bind('change', function() {
+				let fileSize = this.files[0].size/1024/1024; // this gives in MB
+				if (fileSize > 10) {
+					$("#inputfile").val(null);
+					alert('file is too big. images more than 1MB are not allowed')
+					return
+				}
+
+				let ext = $('#inputfile').val().split('.').pop().toLowerCase();
+				if($.inArray(ext, ['jpg','jpeg']) == -1) {
+					$("#inputfile").val(null);
+					alert('only jpeg/jpg files are allowed!');
+				}
+			});
+		</script>
+	</body>
+</html>

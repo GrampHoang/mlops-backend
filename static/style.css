@@ -1,0 +1,131 @@
+html,
+body {
+  height: 100%;
+  background-color: #fafafa;
+}
+
+.infield  {
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+  border-bottom: rgba(128, 128, 128, 0.3) 5px solid;
+  border-radius: 3px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: left;
+  margin: 5px;
+  padding: 5px;
+  width: 95%;
+  margin: 0 auto;
+  height: 100px;
+}
+
+.incontainer{
+  align-items: flex-start;
+  height: 70px;
+  width: 100%;
+  padding: 1%;
+  margin-bottom: 25px;
+}
+
+.outfield{
+  padding: 0px;
+  background-color: #fafafa;
+  position: relative;
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;
+  margin: 0 auto;
+  height: 700px;
+  width: 95%;
+  max-height: 700px;
+}
+
+.imgout{
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+  border-bottom: rgba(128, 128, 128, 0.3) 5px solid;
+  border-radius: 3px;
+  justify-content: center;
+  text-align: left;
+  /* background-color: #FFFFFF;
+  border-color: grey;
+  border-style: solid;
+  border-width: 1px; */
+  height: auto;
+  min-height: 100px;
+  max-height: 700px;
+  width: auto;
+  min-width: 25%;
+  max-width: 75%;
+}
+
+.infoout{
+  /* font-family: 'Roboto', sans-serif; */
+  font-family: inherit;
+  font-size: larger;
+  flex-direction: column;
+  align-self: flex-end;
+  background-color: #fafafa;
+  /* margin-right: 10px; */
+  margin-left: 15px;
+  padding-left: 5px;
+  padding-right: 5px;
+  height: 680px;
+  /* min-height: 500px; */
+  width: 25%;
+  max-width:  25%;
+  /* max-height: 100%; */
+}
+
+.infoout_text{
+  padding-left: 5px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+  border-bottom: rgba(128, 128, 128, 0.3) 5px solid;
+  border-radius: 3px;
+  overflow-y: auto; /* Enable vertical scrolling */
+  overflow-x: hidden; /* Hide horizontal scrolling */
+  flex-grow: 1;
+  margin-bottom: 10px;
+  background-color: #FFFFFF;
+  border-color: grey;
+  border-style: solid;
+  border-width: 1px;
+  height: 25%;
+  width: 100%;
+}
+
+.infoout_json{
+  padding-left: 5px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+  border-bottom: rgba(128, 128, 128, 0.3) 5px solid;
+  border-radius: 3px;
+  overflow-y: auto; /* Enable vertical scrolling */
+  overflow-x: hidden; /* Hide horizontal scrolling */
+  align-self: flex-end;
+  background-color: #FFFFFF;
+  border-color: grey;
+  border-style: solid;
+  border-width: 1px;
+  height: 55%;
+  width: 100%;
+}
+
+
+body {
+  text-align: left;
+  margin: 0px;
+  padding: 0px;
+  background-color: #fafafa;
+}
+
+form {
+  text-align: left;
+  height: 100%;
+}
+
+.container {
+  padding: 10px;
+}
+
+.text_bottom {
+  bottom: 0;
+}
