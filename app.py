@@ -58,10 +58,12 @@ def predictnohtml():
     boxes = results.xyxy[0][:, :-1].tolist()
     conf_scores = results.pred[0][:, -2].tolist()
    
+    output_str = ''
     results_json = []
     for i in range(len(labels)):
         out_name = results.names[int(labels[i])].capitalize()
         out_conf = conf_scores[i]
+        output_str += f'{out_name}: conf: {round(out_conf,3)}, at {round(boxes[i][0])}, {round(boxes[i][1])}, {round(boxes[i][2])}, {round(boxes[i][3])}\n'
         results_json.append({
             "class": out_name,
             "confidence": float(out_conf),
@@ -70,19 +72,21 @@ def predictnohtml():
             "bottomright_x": boxes[i][2],
             "bottomright_y": boxes[i][3]
         })
-    json_out  = json.dumps(results_json, indent=4)
+    output_str_break = output_str.replace("\n", "<br>")
+    json_out  = json.dumps(results_json, indent=2)
 
     results.render()
    
-    for img in results.ims:
+    for img in results.ims:x
         RGB_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         im_arr = cv2.imencode('.jpg', RGB_img)[1]
 
         encoded_image_base64 = base64.b64encode(im_arr.tobytes()).decode('utf-8')
     
     response = jsonify({
-        'results': results_json,
-        'result_img': encoded_image_base64
+        'results': json_out,
+        'result_img': encoded_image_base64,
+        'result_str': output_str_break
     })
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
