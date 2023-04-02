@@ -51,6 +51,13 @@ pipeline {
                     }"""
                 )
             }
+            post {
+                success {
+                    script { 
+                        untar file: ARCHIV, dir: 'runs' 
+                    }
+                }
+            }
         }
 
 
