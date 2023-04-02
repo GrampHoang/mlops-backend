@@ -81,7 +81,7 @@ pipeline {
             steps {
                 // sh  "docker ps | grep 9443 | awk '{print $1}' | xargs docker container stop"
                 sh '''
-                    docker run -p 5000:5000 ${MODEL_NAME}
+                    docker run --rm -d -p 5000:5000 ${MODEL_NAME}
                 '''
             }
         }
