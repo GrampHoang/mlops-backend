@@ -45,7 +45,7 @@ pipeline {
                         "files": [
                             {
                                 "pattern": "mlops-trained-model/${MODEL_NAME}/${VERSION_}.tar.gz",
-                                "target": "${ARCHIV}"
+                                "target": "."
                             }
                         ]
                     }"""
@@ -64,8 +64,6 @@ pipeline {
         stage('Upload model and results to Artifactory') {
             steps {
                 sh '''
-                cd ${ARCHIV}
-                cd ${MODEL_NAME}
                 ls
                 '''
             }
