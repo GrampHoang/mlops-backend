@@ -3,14 +3,13 @@
 
 
 pipeline {
-    agent {
-        any
+    agent any
         // docker {
         //     // image 'ultralytics/yolov5:latest'
         //     image 'hoangchieng/mlops_image:v3'
         //     args '--ipc=host'
         // }
-    }
+    
 
     parameters {
         string(name: 'MODEL_NAME', description: 'The name for the model')
