@@ -77,6 +77,15 @@ pipeline {
             }
         }
 
+        stage('Deploy model'){
+            steps {
+                sh '''
+                    docker ps | grep 9443 | awk '{print $1}' | xargs docker container stop
+                    docker run -p 5000:5000 ${MODEL_NAME}
+                '''
+            }
+        }
+
     }
     post {
         always {
