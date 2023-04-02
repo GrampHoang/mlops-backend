@@ -64,7 +64,7 @@ pipeline {
         stage('Upload model and results to Artifactory') {
             steps {
                 sh '''
-                ls
+                ls -l
                 '''
             }
         }
