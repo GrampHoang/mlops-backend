@@ -69,7 +69,7 @@ pipeline {
             }
         }
 
-        stage('Add model and results to Dockerfile') {
+        stage('Build docker images') {
             steps {
                 sh '''
                 docker build -t ${MODEL_NAME} .
