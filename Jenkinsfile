@@ -51,19 +51,22 @@ pipeline {
                     }"""
                 )
             }
-            post {
-                success {
-                    script { 
-                        untar file: ARCHIV, dir: 'runs' 
-                    }
-                }
-            }
+            // post {
+            //     success {
+            //         script { 
+            //             untar file: ARCHIV, dir: 'runs' 
+            //         }
+            //     }
+            // }
         }
 
 
         stage('Upload model and results to Artifactory') {
             steps {
-                sh 'ls'
+                sh '''
+                cd ${ARCHIV}
+                ls
+                '''
             }
         }
 
