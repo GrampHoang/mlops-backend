@@ -61,11 +61,18 @@ pipeline {
         }
 
 
-        stage('Upload model and results to Artifactory') {
+        stage('Add model and results to Dockerfile') {
             steps {
                 sh '''
-                cd ${MODEL_NAME}
                 ls -l
+                '''
+            }
+        }
+
+        stage('Add model and results to Dockerfile') {
+            steps {
+                sh '''
+                docker build -t ${MODEL_NAME} .
                 '''
             }
         }
