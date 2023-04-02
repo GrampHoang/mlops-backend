@@ -65,7 +65,7 @@ pipeline {
             steps {
                 sh '''
                 cd ${ARCHIV}
-                ls
+                ls ${MODEL_NAME}
                 '''
             }
         }
