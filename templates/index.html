@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 	<head>
+		<meta name="referrer" content="no-referrer-when-downgrade">
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 		<link rel="stylesheet" href="//stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
@@ -16,12 +17,13 @@
 				}
 			}
 		</style>
-		<link rel="stylesheet" href="style.css">
+		<link rel="stylesheet" href="static/style.css">
 
 		<title>YOLOv5 Object Detection - Demo</title>
 	</head>
 	<body>
-		<form method=post enctype=multipart/form-data>
+		<!-- <form method=post enctype=multipart/form-data> -->
+			<form id = "myform">
 			<div style= "height:50px"></div>
 			<div class="infield">
 				<div class="incontainer">
@@ -34,11 +36,11 @@
 				
 				<div class="incontainer">
 					<!-- <div style= "height:40px"></div> -->
-					<h5>Select YOLOv5 model: </h5>
-					<select name="model_choice" id ="model_choice"></select>
+					<h5>Current model: </h5>
+					<h5 name="model_choice" id ="model_choice"></h5>
 					<script>
 					  // make the API call to fetch the list of models
-					fetch('/model')
+					fetch('http://localhost:5000/model')
 					  .then(response => response.json())
 					  .then(data => {
 						// update the options of the select element with the fetched data
@@ -48,36 +50,73 @@
 						  optionElement.textContent = model;
 						  selectElement.appendChild(optionElement);
 						});
-					  })
+					  }, { mode: 'no-cors' })
 					  .catch(error => console.error(error));
 					</script>
 				</div>
 				<!-- <div style= "height:50px"></div> -->
 				<!-- <div style= "margin-right:50px"> -->
-				<button class="btn btn-lg btn-primary btn-block" type="submit" style= "margin-right:10px">Submit</button>
-				<!-- </div> -->
+				<button class="btn btn-lg btn-primary btn-block" type="submit" style= "margin-right:10px" id="submit-btn">Submit</button>
 			</div>
 			<div class="outfield">
 				<div style= "height:10px"></div>
-				<div class="imgout">
-					<img id="ItemPreview" style="max-width: 900px; max-height: 658px;" onerror="this.style.display='none';" alt="Not found" src="data:image/png;base64, {{ responsed}}" style="height:auto; max-width: 80%; max-height: 800px;">
+				<div class="imgout" id="imgOut">
+					<img id="ItemPreview" onerror="this.style.display='none'" style="height:auto; max-width: 80%; max-height: 800px; max-width: 900px; max-height: 658px;">
 				</div>
 				<div class="infoout">
 					<h5>Detected objects:</h5>
 					<div class="infoout_text">
-						<div>{{ output_str | safe}}</div>
+						<div style="display:none;" id="outstr">{{ output_str | safe}}</div>
 					</div>
 					<h5>JSON output:</h5>
 					<div class="infoout_json">
-						<pre>{{ json_out }}</pre>
+						<pre style="display:none;" id="jsoninfo">{{ json_out }}</pre>
 					</div>
 					<div style= "height:20px"></div>
-					<button class="btn btn-lg btn-primary btn-block" onclick="downloadJSON()">Download JSON</button>
 				</div>
 			</div>
 			<div style= "height:150px"></div>
 			<p align="center">Demo MLOps</p>
     </form>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
+		<!-- <video id="video-stream"></video>
+		<img id = "processed-video">
+		<script>
+			const socket = io('http://localhost:5000');
+			const video = document.getElementById('video-stream');
+			const constraints = {
+				video: {
+					width: { max: 640 },
+					height: { max: 480 },
+				},
+				};
+			
+			navigator.mediaDevices.getUserMedia(constraints)
+				.then((stream) => {
+					video.srcObject = stream;
+					video.play();
+					const canvas = document.createElement('canvas');
+					const ctx = canvas.getContext('2d');
+					setInterval(() => {
+						canvas.width = 640;
+						canvas.height = 480;
+						ctx.drawImage(video, 0, 0);
+						const data = canvas.toDataURL('image/jpeg');
+						socket.emit('frame', data);
+					}, 1000/5);
+				})
+				.catch((error) => {
+					// console.error('Error accessing camera', error);
+				});
+
+			socket.on('connect', () => {
+				console.log('Socket connection successful');
+			});
+			const processedVideo2 = document.getElementById("processed-video");
+			socket.on('processed_frame', (data) => {
+				processedVideo2.src = data;
+				});
+		</script> -->
 		<script src="//code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 		<script src="//cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
 		<script src="//stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
@@ -97,5 +136,77 @@
 				}
 			});
 		</script>
+		<script>
+			document.addEventListener("DOMContentLoaded", function(event) {
+			document.querySelectorAll('img').forEach(function(img){
+				img.onerror = function(){this.style.display='none';};
+			})
+			});
+
+			const form = document.querySelector('#myform');
+			const submitBtn = document.querySelector('#submit-btn');
+			const jsonOutput = document.getElementById('jsoninfo');
+			const stringOutput = document.getElementById('outstr');
+			
+			form.addEventListener('submit', async (e) => {
+				e.preventDefault();
+				const file = document.querySelector('#inputfile').files[0];
+				const formData = new FormData();
+				formData.append('file', file);
+
+				const response = await fetch('http://localhost:5000/predict', {
+					method: 'POST',
+					body: formData
+					});
+				const jsonres = await response.json();
+
+				const resultImgData = jsonres.result_img;
+				const resultImg = document.getElementById('ItemPreview');
+				resultImg.src = 'data:image/png;base64,' + resultImgData;
+				
+				console.log(resultImg);
+				console.log(jsonOutput);
+				
+				jsonOutput.innerHTML = jsonres.results;
+				stringOutput.innerHTML = jsonres.result_str;
+				
+				document.getElementById("jsoninfo").style.display = "block";
+				document.getElementById("outstr").style.display = "block";
+				document.getElementById("ItemPreview").style.display = "block";
+			});
+		</script>
+		<!-- <script>
+			const toggleBtn = document.getElementById('opencam');
+			const videoStream = document.getElementById('imgOut');
+			const ImgOutBox = document.getElementById('ItemPreview');
+			toggleBtn.addEventListener('click', async function() {
+				if (videoStream.lastElementChild.id == "ItemPreview") {
+					// videoStream.lastElementChild.style.display = 'block';
+					await startVideoStream();
+				} else {
+					await stopVideoStream();
+					// videoStream.lastElementChild.style.display = 'none';
+				}
+			});
+
+			function stopVideoStream() {
+				// Remove the <img> element to stop the video stream
+				const videoElement = document.querySelector(`imgOut`);
+				if (videoStream.lastChild) {
+					videoStream.removeChild(videoStream.lastChild);
+					videoStream.appendChild(ImgOutBox);
+				}
+			}
+
+			function startVideoStream() {
+			// Start the video stream by creating a new <img> element and setting its src attribute to the video_feed URL
+				const videoElement = document.createElement('img');
+				videoElement.id = "processed-video";
+				videoElement.alt = "";
+				// videoElement.src = videoUrl;
+				videoStream.removeChild(videoStream.lastChild)
+				videoStream.appendChild(videoElement);
+			}	
+		  </script> -->
 	</body>
 </html>

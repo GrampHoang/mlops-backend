@@ -4,14 +4,19 @@ from PIL import Image
 import cv2
 import base64
 import torch
-from flask import Flask, jsonify, render_template, request, make_response
+from flask import Flask, Response,  jsonify, render_template, request, make_response
 from werkzeug.exceptions import BadRequest
 import os
 import json
-
+from flask_socketio import SocketIO
+import numpy as np
+import time
+from flask_cors import CORS
 # creating flask app
-app = Flask(__name__)
 
+app = Flask(__name__)
+CORS(app)
+socketio = SocketIO(app, async_mode='threading', cors_allowed_origins='*', cors_credentials=True)
 
 # create a python dictionary for your models d = {<key>: <value>, <key>: <value>, ..., <key>: <value>}
 dictOfModels = {}
@@ -20,31 +25,60 @@ listOfKeys = []
 
 modelname = []
 
+global cap
+
+cors = CORS(app, resources={r"/*": {"origins": "*"}})
+
 # inference fonction
 def get_prediction(img_bytes,model):
     img = Image.open(io.BytesIO(img_bytes))
-    # inference
-    results = model(img, size=640)  
-    # extract the predicted class labels, confidence scores, and bounding box coordinates
-    # class_labels = results.pred[0][:, -1].numpy()
-    # conf_scores = results.pred[0][:, -2].numpy()
-    # bbox_coords = results.pred[0][:, :-2].numpy()
+    results = model(img, size=480)  
     return results
 
 
 # get method
 @app.route('/', methods=['GET'])
 def get():
-    # in the select we will have each key of the list in option
     return render_template("index.html")
 
 @app.route('/model', methods=['GET'])
 def getModel():
-    # in the select we will have each key of the list in option
     headers = {
         'Access-Control-Allow-Origin': '*'
     }
     return (listOfKeys, 200, headers)
+
+# def gen_frames():
+#     global cap
+#     cap = cv2.VideoCapture(0)
+#     while cap.isOpened():
+#         success, frame = cap.read()
+#         if not success:
+#             break
+#         results = dictOfModels[listOfKeys[0]](frame, size = 640)
+#         results.render()
+#         for img in results.ims:
+#             # RGB_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+#             im_arr = cv2.imencode('.jpg', img)[1]
+#         frame = im_arr.tobytes()
+#         yield (b'--frame\r\n'
+#                 b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
+# @app.route('/video_feed')
+# def video_feed():
+#     respon = Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+#     respon.headers.add('Access-Control-Allow-Origin', '*')
+#     return respon
+
+# @app.route('/stop_video')
+# def stop_video():
+#     global cap
+#     if(cap != None):
+#         cap.release()
+#         cap = cv2.VideoCapture(0)
+#         cv2.destroyAllWindows()
+#         cap = cv2.VideoCapture(0)
+#     return 'Video stopped'
 
 @app.route('/predict', methods=['POST'])
 def predictnohtml():
@@ -103,20 +137,6 @@ def predict():
     results = get_prediction(img_bytes,model_get)
     print(f'User selected model : {request.form.get("model_choice")}')
 
-#     class_labels = results.pred[0][:, -1].numpy()
-#     conf_scores = results.pred[0][:, -2].numpy()
-#     bbox_coords = results.pred[0][:, :-2].numpy()
-
-#     output_dict = {
-#     'objects': [
-#         {
-#             'class': model_get.names[int(class_labels)]
-#             'confidence': float(conf_scores),
-#             'bbox': bbox.tolist()
-#         } for cls, conf, bbox in zip(results.pred[0][:, -1], results.pred[0][:, 4], results.pred[0][:, :4])
-#     ]
-#   }
-    # extract predicted class and coordinates
     labels = results.xyxy[0][:, -1].tolist()
     boxes = results.xyxy[0][:, :-1].tolist()
     conf_scores = results.pred[0][:, -2].tolist()
@@ -149,6 +169,20 @@ def predict():
         # response.headers['Content-Type'] = 'image/jpeg'
     return render_template("index.html", len = len(listOfKeys), listOfKeys = listOfKeys, responsed = encoded_image_base64, output_str=output_str_break, json_out=json_out)
     # return response
+
+@socketio.on('frame')
+def process_frame(frame):
+    # Convert base64 string to numpy array
+    imgdata = base64.b64decode(frame.split(',')[1])
+    img_real = Image.open(io.BytesIO(imgdata))
+    results = dictOfModels[listOfKeys[0]](img_real, size = 640)
+    results.render()
+    for img in results.ims:
+        RGB_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        im_arr = cv2.imencode('.jpg', RGB_img)[1]
+    data = base64.b64encode(im_arr).decode('utf-8')
+    # Send processed frame back to frontend
+    socketio.emit('processed_frame', f"data:image/jpeg;base64,{data}")
 
 def extract_img(request):
     # checking if image uploaded is valid
@@ -187,4 +221,5 @@ if __name__ == '__main__':
     print('Server is now running')
     
     # starting app
-    app.run(debug=True,host='0.0.0.0')
+    socketio.run(app, debug=True, host='0.0.0.0', allow_unsafe_werkzeug=True)
+    #app.run(debug=True,host='0.0.0.0')
