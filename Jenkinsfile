@@ -69,22 +69,22 @@ pipeline {
             }
         }
 
-        stage('Build docker images') {
-            steps {
-                sh '''
-                docker build -t ${MODEL_NAME} .
-                '''
-            }
-        }
+        // stage('Build docker images') {
+        //     steps {
+        //         sh '''
+        //         docker build -t ${MODEL_NAME} .
+        //         '''
+        //     }
+        // }
 
-        stage('Deploy model'){
-            steps {
-                // sh  "docker ps | grep 9443 | awk '{print $1}' | xargs docker container stop"
-                sh '''
-                    docker run -p 5000:5000 ${MODEL_NAME}
-                '''
-            }
-        }
+        // stage('Deploy model'){
+        //     steps {
+        //         // sh  "docker ps | grep 9443 | awk '{print $1}' | xargs docker container stop"
+        //         sh '''
+        //             docker run -p 5000:5000 ${MODEL_NAME}
+        //         '''
+        //     }
+        // }
 
     }
     post {
