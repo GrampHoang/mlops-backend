@@ -37,7 +37,7 @@
 				<div class="incontainer">
 					<!-- <div style= "height:40px"></div> -->
 					<h5>Current model: </h5>
-					<h5 name="model_choice" id ="model_choice"></h5>
+					<select name="model_choice" id ="model_choice"></select>
 					<script>
 					  // make the API call to fetch the list of models
 					fetch('http://localhost:5000/model')
@@ -147,12 +147,20 @@
 			const submitBtn = document.querySelector('#submit-btn');
 			const jsonOutput = document.getElementById('jsoninfo');
 			const stringOutput = document.getElementById('outstr');
-			
+			// const modelSelect = document.getElementById('model_choice');
+			// const selectedModel = "no";
+			// modelSelect.addEventListener('change', (event) => {
+			// 	const selectedModel = event.target.value;
+			// });
+
 			form.addEventListener('submit', async (e) => {
 				e.preventDefault();
 				const file = document.querySelector('#inputfile').files[0];
+				const modelSelect = document.getElementById('model_choice');
+				const selectedModel = modelSelect.value;
 				const formData = new FormData();
 				formData.append('file', file);
+				formData.append('model', selectedModel);
 
 				const response = await fetch('http://localhost:5000/predict', {
 					method: 'POST',

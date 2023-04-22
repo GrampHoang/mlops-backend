@@ -86,7 +86,8 @@ def predictnohtml():
         return jsonify({'error': 'No file uploaded'})
     file = request.files['file']
     img_bytes = file.read()
-    model_get = dictOfModels[listOfKeys[0]]
+    model = request.form['model']
+    model_get = dictOfModels[model]
     results = get_prediction(img_bytes,model_get)
     labels = results.xyxy[0][:, -1].tolist()
     boxes = results.xyxy[0][:, :-1].tolist()
@@ -97,7 +98,7 @@ def predictnohtml():
     for i in range(len(labels)):
         out_name = results.names[int(labels[i])].capitalize()
         out_conf = conf_scores[i]
-        output_str += f'{out_name}: conf: {round(out_conf,3)}, at {round(boxes[i][0])}, {round(boxes[i][1])}, {round(boxes[i][2])}, {round(boxes[i][3])}\n'
+        output_str += f'{out_name}: {round(out_conf,3)}, {{({round(boxes[i][0])}, {round(boxes[i][1])}), ({round(boxes[i][2])}, {round(boxes[i][3])})}}\n'
         results_json.append({
             "class": out_name,
             "confidence": float(out_conf),
@@ -171,18 +172,18 @@ def predict():
     # return response
 
 @socketio.on('frame')
-def process_frame(frame):
+def process_frame(frame, model):
     # Convert base64 string to numpy array
     imgdata = base64.b64decode(frame.split(',')[1])
     img_real = Image.open(io.BytesIO(imgdata))
-    results = dictOfModels[listOfKeys[0]](img_real, size = 640)
+    results = dictOfModels[model](img_real, size = 640)
     results.render()
     for img in results.ims:
         RGB_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         im_arr = cv2.imencode('.jpg', RGB_img)[1]
     data = base64.b64encode(im_arr).decode('utf-8')
     # Send processed frame back to frontend
-    socketio.emit('processed_frame', f"data:image/jpeg;base64,{data}")
+    socketio.emit('processed_frame', f"data:image/webp;base64,{data}")
 
 def extract_img(request):
     # checking if image uploaded is valid

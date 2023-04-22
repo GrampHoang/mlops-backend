@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta name="referrer" content="no-referrer-when-downgrade">
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<link rel="stylesheet" href="//stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+		<style>
+			.bd-placeholder-img {
+				font-size: 1.125rem;
+				text-anchor: start;
+			}
+
+			@media (min-width: 768px) {
+				.bd-placeholder-img-lg {
+					font-size: 150%;
+				}
+			}
+		</style>
+		<link rel="stylesheet" href="static/style.css">
+
+		<title>YOLOv5 Object Detection - Demo</title>
+	</head>
+	<body>
+		<!-- <form method=post enctype=multipart/form-data> -->
+        <div class="mainscreen">
+            <div class="image-container">
+				<img id="ItemPreview" onerror="this.style.display='none'" style="width:auto; height:auto; max-width: 100%; max-height: 100%;">
+            </div>
+            <form id = "myform">
+            <div class="text-container">
+                <div class="top-text">
+					<header>
+						<h5><option style="font-weight: bold">Current model: </option></h5>
+						<h5 name="model_choice" id ="model_choice"></h5>
+					</header>
+                    <div style= "height:5px"></div>
+					<script>
+					fetch('http://localhost:5000/model')
+					  .then(response => response.json())
+					  .then(data => {
+						// update the options of the select element with the fetched data
+						const selectElement = document.getElementById('model_choice');
+						data.forEach(model => {
+						  const optionElement = document.createElement('option');
+						  optionElement.textContent = model;
+						  selectElement.appendChild(optionElement);
+						});
+					  }, { mode: 'no-cors' })
+					  .catch(error => console.error(error));
+					</script>
+					<input type="file" name="file" class="form-control-file" id="inputfile" style="padding-left: 5%;">
+                    <div style= "height:10px"></div>
+                    <button class="btn btn-lg btn-primary btn-block" type="submit" style= "margin-right:10px" id="submit-btn">Submit</button>
+                </div>
+                <div class="bottom-text">
+					<div style="display:none; font-size: 14px;" id="outstr">{{ output_str | safe}}</div>
+                </div>
+            </div>
+            </form>
+        </div>
+    </form>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
+		<script src="//code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+		<script src="//stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+		<script type="text/javascript">
+			$('#inputfile').bind('change', function() {
+				let fileSize = this.files[0].size/1024/1024; // this gives in MB
+				if (fileSize > 10) {
+					$("#inputfile").val(null);
+					alert('file is too big. images more than 1MB are not allowed')
+					return
+				}
+
+				let ext = $('#inputfile').val().split('.').pop().toLowerCase();
+				if($.inArray(ext, ['jpg','jpeg']) == -1) {
+					$("#inputfile").val(null);
+					alert('only jpeg/jpg files are allowed!');
+				}
+			});
+		</script>
+		<script>
+			document.addEventListener("DOMContentLoaded", function(event) {
+			document.querySelectorAll('img').forEach(function(img){
+				img.onerror = function(){this.style.display='none';};
+			})
+			});
+
+			const form = document.querySelector('#myform');
+			const submitBtn = document.querySelector('#submit-btn');
+			const jsonOutput = document.getElementById('outstr');
+			const stringOutput = document.getElementById('outstr');
+			
+			form.addEventListener('submit', async (e) => {
+				e.preventDefault();
+				const file = document.querySelector('#inputfile').files[0];
+				const formData = new FormData();
+				formData.append('file', file);
+
+				const response = await fetch('http://localhost:5000/predict', {
+					method: 'POST',
+					body: formData
+					});
+				const jsonres = await response.json();
+
+				const resultImgData = jsonres.result_img;
+				const resultImg = document.getElementById('ItemPreview');
+				resultImg.src = 'data:image/png;base64,' + resultImgData;
+				
+				console.log(resultImg);
+				console.log(jsonOutput);
+				
+				jsonOutput.innerHTML = jsonres.results;
+				stringOutput.innerHTML = jsonres.result_str;
+				
+				document.getElementById("outstr").style.display = "block";
+				document.getElementById("outstr").style.display = "block";
+				document.getElementById("ItemPreview").class = "image-display";
+				document.getElementById("ItemPreview").style.display = "block";
+			});
+		</script>
+	</body>
+</html>
