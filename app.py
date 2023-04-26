@@ -205,6 +205,7 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         models_directory = sys.argv[1]
     print(f'Watching for yolov5 models under {models_directory}...')
+    torch.hub._validate_not_a_forked_repo=lambda a,b,c: True
     for r, d, f in os.walk(models_directory):
         for file in f:
             if ".pt" in file:
