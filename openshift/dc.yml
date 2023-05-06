@@ -39,7 +39,7 @@ objects:
     spec:
       ports:
         - name: backend-mlops
-          port: 8080
+          port: 5000
       selector:
         app.kubernetes.io/instance: mlops-main
   - apiVersion: route.openshift.io/v1
