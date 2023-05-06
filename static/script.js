@@ -1,6 +1,8 @@
-const modelURL = "http://localhost:5000/model";
-const predURL  = "http://localhost:5000/predict";
- 
+// const modelURL = "http://localhost:5000/model";
+// const predURL  = "http://localhost:5000/predict";
+const modelURL = "model";
+const predURL  = "predict";
+
  // make the API call to fetch the list of models
  fetch(modelURL)
     .then(response => response.json())
@@ -31,32 +33,32 @@ document.addEventListener("DOMContentLoaded", function(event) {
     // 	const selectedModel = event.target.value;
     // });
 
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const file = document.querySelector('#inputfile').files[0];
-        const modelSelect = document.getElementById('model_choice');
-        const selectedModel = modelSelect.value;
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('model', selectedModel);
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const file = document.querySelector('#inputfile').files[0];
+    const modelSelect = document.getElementById('model_choice');
+    const selectedModel = modelSelect.value;
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('model', selectedModel);
 
-        const response = await fetch(predURL, {
-            method: 'POST',
-            body: formData
-            });
-        const jsonres = await response.json();
+    const response = await fetch(predURL, {
+        method: 'POST',
+        body: formData
+        });
+    const jsonres = await response.json();
 
-        const resultImgData = jsonres.result_img;
-        const resultImg = document.getElementById('ItemPreview');
-        resultImg.src = 'data:image/png;base64,' + resultImgData;
-        
-        console.log(resultImg);
-        console.log(jsonOutput);
-        
-        jsonOutput.innerHTML = jsonres.results;
-        stringOutput.innerHTML = jsonres.result_str;
-        
-        document.getElementById("jsoninfo").style.display = "block";
-        document.getElementById("outstr").style.display = "block";
-        document.getElementById("ItemPreview").style.display = "block";
-    });
+    const resultImgData = jsonres.result_img;
+    const resultImg = document.getElementById('ItemPreview');
+    resultImg.src = 'data:image/png;base64,' + resultImgData;
+    
+    console.log(resultImg);
+    console.log(jsonOutput);
+    
+    jsonOutput.innerHTML = jsonres.results;
+    stringOutput.innerHTML = jsonres.result_str;
+    
+    document.getElementById("jsoninfo").style.display = "block";
+    document.getElementById("outstr").style.display = "block";
+    document.getElementById("ItemPreview").style.display = "block";
+});
