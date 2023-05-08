@@ -77,7 +77,7 @@ pipeline {
                     // Build the Docker image
                     sh 'docker build -t ${IMAGE_TO_PUSH} .'
                     
-                    sh 'jfrog rt docker-push ${IMAGE_TO_PUSH} ${DOCKER_REPO}'
+                    // sh 'jfrog rt docker-push ${IMAGE_TO_PUSH} ${DOCKER_REPO}'
                     // Configure the Artifactory server
                     // def server = Artifactory.server(SERVER_ID)
 
@@ -92,11 +92,11 @@ pipeline {
                     // sh "docker push ${imageTag}"
 
                     // Push the Docker image to Artifactory Docker repository
-                    // rtDockerPush(
-                    //     serverId: SERVER_ID,
-                    //     image: IMAGE_TO_PUSH,
-                    //     targetRepo: DOCKER_REPO
-                    // )
+                    rtDockerPush(
+                        serverId: "${SERVER_ID}",
+                        image: "${IMAGE_TO_PUSH}",
+                        targetRepo: "${DOCKER_REPO}"
+                    )
                 }
             }
         }
