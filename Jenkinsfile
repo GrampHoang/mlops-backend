@@ -82,7 +82,7 @@ pipeline {
             }
         }
 
-        stage('Add model and results to Dockerfile') {
+        stage('Check') {
             steps {
                 sh '''
                 ls
