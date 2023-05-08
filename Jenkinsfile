@@ -85,8 +85,7 @@ pipeline {
                     ]) {
                         // Build the Docker image
                         sh 'docker build -t ${IMAGE_TO_PUSH} .'
-                        sh 'docker login -u${env.USERNAME} -p${env.PASSWORD} artifactorymlopsk18.jfrog.io'
-                        
+                        sh "docker login -u ${USERNAME} -p ${PASSWORD} <registry-url>"
                     }
                 }
             }
