@@ -75,7 +75,8 @@ pipeline {
             steps {
                 sh '''
                 cd ${MODEL_NAME}
-                ls -l
+                chmod 777 "${VERSION_}.tar.gz"
+                tar -xvf "${VERSION_}.tar.gz"
                 '''
             }
         }
