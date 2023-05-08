@@ -40,17 +40,26 @@ pipeline {
         
         stage('Pull model result from Artifactory') {
             steps {
-                rtDownload (
-                    serverId: 'Jfrog-mlops-model-store',
-                    spec: """{
+                script {
+                    def server = Artifactory.server('Jfrog-mlops-model-store')
+                    def downloadSpec = """{
                         "files": [
                             {
                                 "pattern": "mlops-trained-models/${MODEL_NAME}/${VERSION_}.tar.gz",
-                                "target": "."
+                                "target": "./"
                             }
                         ]
                     }"""
-                )
+                    def buildInfo = server.download(downloadSpec)
+                    
+                    // Check if the file was downloaded successfully
+                    // def fileDownloaded = buildInfo.getDeployedArtifacts().find { it.getName() == '08052303.tar.gz' }
+                    // if (fileDownloaded) {
+                    //     echo "File was successfully downloaded from Artifactory"
+                    // } else {
+                    //     echo "Error: Failed to download file from Artifactory"
+                    // }
+                }
             }
             // post {
             //     success {
@@ -65,6 +74,7 @@ pipeline {
         stage('Add model and results to Dockerfile') {
             steps {
                 sh '''
+                cd ${MODEL_NAME}
                 ls -l
                 '''
             }
