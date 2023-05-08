@@ -44,7 +44,7 @@ pipeline {
                     spec: """{
                         "files": [
                             {
-                                "pattern": "mlops-trained-model/${MODEL_NAME}/${VERSION_}.tar.gz",
+                                "pattern": "mlops-trained-models/${MODEL_NAME}/${VERSION_}.tar.gz",
                                 "target": "."
                             }
                         ]
