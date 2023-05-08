@@ -74,8 +74,7 @@ pipeline {
         stage('Build and Push Docker Image') {
             steps {
                 script {
-                    // Build the Docker image
-                    // sh 'docker build -t ${IMAGE_TO_PUSH} .'
+                    
                     
                     withCredentials([
                         usernamePassword(
@@ -84,8 +83,11 @@ pipeline {
                             passwordVariable: 'PASSWORD'
                         )
                     ]) {
-                        echo "Username: ${env.USERNAME}"
-                        echo "Password: ${env.PASSWORD}"
+                        // Build the Docker image
+                        sh 'docker build -t ${IMAGE_TO_PUSH} .'
+                        sh '''
+                            docker login -u"${env.USERNAME}" -p"${env.PASSWORD}" artifactorymlopsk18.jfrog.io
+                        '''
                     }
                 }
             }
