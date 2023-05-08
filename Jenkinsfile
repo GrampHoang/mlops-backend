@@ -85,6 +85,7 @@ pipeline {
         stage('Check') {
             steps {
                 sh '''
+                cd models_train
                 ls
                 '''
             }
