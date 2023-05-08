@@ -31,6 +31,9 @@ pipeline {
         // MLOPS_TRAIN_NUMBER = "${env.BUILD_NUMBER}"
         VERSION_ = "${params.VERSION}"
         ARCHIV = "${params.MODEL_NAME}"+'.tar.gz'
+        SERVER_ID="Jfrog-mlops-model-store"
+        DOCKER_REPO="mlops-docker-images"
+        MODEL_RESULT = "mlops-trained-models"
         // Define default job parameters
         propagate = true
 
@@ -41,11 +44,11 @@ pipeline {
         stage('Pull model result from Artifactory') {
             steps {
                 script {
-                    def server = Artifactory.server('Jfrog-mlops-model-store')
+                    def server = Artifactory.server(SERVER_ID)
                     def downloadSpec = """{
                         "files": [
                             {
-                                "pattern": "mlops-trained-models/${MODEL_NAME}/${VERSION_}.tar.gz",
+                                "pattern": "${MODEL_RESULT}/${MODEL_NAME}/${VERSION_}.tar.gz",
                                 "target": "./"
                             }
                         ]
@@ -82,22 +85,30 @@ pipeline {
             }
         }
 
-        stage('Check') {
-            steps {
-                sh '''
-                cd models_train
-                ls
-                '''
-            }
-        }
-
-        // stage('Build docker images') {
+        // stage('Check') {
         //     steps {
         //         sh '''
-        //         docker build -t ${MODEL_NAME} .
+        //         cd models_train
+        //         ls
         //         '''
         //     }
         // }
+
+        stage('Build and Push Docker Image') {
+            steps {
+                script {
+                    // Build the Docker image
+                    sh 'docker build -t ${MODEL_NAME}:${VERSION_} .'
+                    
+                    // Push the Docker image to Artifactory Docker repository
+                    rtDockerPush(
+                        serverId: SERVER_ID,
+                        image: '${MODEL_NAME}:${VERSION_}',
+                        targetRepo: DOCKER_REPO
+                    )
+                }
+            }
+        }
 
         // stage('Deploy model'){
         //     steps {
