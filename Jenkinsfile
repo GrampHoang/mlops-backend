@@ -77,12 +77,25 @@ pipeline {
                     // Build the Docker image
                     sh 'docker build -t ${IMAGE_TO_PUSH} .'
                     
+                    // Configure the Artifactory server
+                    def server = Artifactory.server(SERVER_ID)
+
+                    // Log in to Artifactory using the configured server credentials
+                    server.dockerLogin()
+
+                    // Tag the Docker image with the Artifactory repository URL
+                    def imageTag = server.getURL() + "/${DOCKER_REPO}/${IMAGE_TO_PUSH}"
+                    sh "docker tag ${IMAGE_TO_PUSH} ${imageTag}"
+
+                    // Push the Docker image to Artifactory
+                    sh "docker push ${imageTag}"
+
                     // Push the Docker image to Artifactory Docker repository
-                    rtDockerPush(
-                        serverId: SERVER_ID,
-                        image: IMAGE_TO_PUSH,
-                        targetRepo: DOCKER_REPO
-                    )
+                    // rtDockerPush(
+                    //     serverId: SERVER_ID,
+                    //     image: IMAGE_TO_PUSH,
+                    //     targetRepo: DOCKER_REPO
+                    // )
                 }
             }
         }
