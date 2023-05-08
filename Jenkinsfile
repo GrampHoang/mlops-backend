@@ -77,6 +77,15 @@ pipeline {
                 cd ${MODEL_NAME}
                 chmod 777 "${VERSION_}.tar.gz"
                 tar -xvf "${VERSION_}.tar.gz"
+                mv train/exp/weights/last.pt ../models_train
+                '''
+            }
+        }
+
+        stage('Add model and results to Dockerfile') {
+            steps {
+                sh '''
+                ls
                 '''
             }
         }
