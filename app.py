@@ -10,9 +10,14 @@ import os
 import json
 from flask_socketio import SocketIO
 import numpy as np
+import threading
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 import time
 from flask_cors import CORS
 # creating flask app
+
+FLASK_RUN_RELOAD = False
 
 app = Flask(__name__)
 CORS(app)
@@ -39,6 +44,7 @@ def get_prediction(img_bytes,model):
 # get method
 @app.route('/', methods=['GET'])
 def get():
+    # check_model()
     return render_template("index.html")
 
 @app.route('/model', methods=['GET'])
@@ -47,38 +53,6 @@ def getModel():
         'Access-Control-Allow-Origin': '*'
     }
     return (listOfKeys, 200, headers)
-
-# def gen_frames():
-#     global cap
-#     cap = cv2.VideoCapture(0)
-#     while cap.isOpened():
-#         success, frame = cap.read()
-#         if not success:
-#             break
-#         results = dictOfModels[listOfKeys[0]](frame, size = 640)
-#         results.render()
-#         for img in results.ims:
-#             # RGB_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-#             im_arr = cv2.imencode('.jpg', img)[1]
-#         frame = im_arr.tobytes()
-#         yield (b'--frame\r\n'
-#                 b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-
-# @app.route('/video_feed')
-# def video_feed():
-#     respon = Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
-#     respon.headers.add('Access-Control-Allow-Origin', '*')
-#     return respon
-
-# @app.route('/stop_video')
-# def stop_video():
-#     global cap
-#     if(cap != None):
-#         cap.release()
-#         cap = cv2.VideoCapture(0)
-#         cv2.destroyAllWindows()
-#         cap = cv2.VideoCapture(0)
-#     return 'Video stopped'
 
 @app.route('/predict', methods=['POST'])
 def predictnohtml():
@@ -196,29 +170,47 @@ def extract_img(request):
         raise BadRequest("Given file is invalid")
         
     return file
-    
 
-if __name__ == '__main__':
-    print('Starting yolov5 webservice...')
-    # Getting directory containing models from command args (or default 'models_train')
-    models_directory = 'models_train'
+models_directory = '/workspace/models_train'
+
+def watch_models():
+    global models_directory
+    class MyHandler(FileSystemEventHandler):
+        def on_modified(self, event):
+            print(f'Models folder has been updated')
+            check_model()
+    event_handler = MyHandler()
+    observer = Observer()
+    observer.schedule(event_handler, models_directory, recursive=True)
+    observer.start()
+    print(f'Watching for yolov5 models under {models_directory}...')
+
+def check_model():
+    global models_directory
     if len(sys.argv) > 1:
         models_directory = sys.argv[1]
-    print(f'Watching for yolov5 models under {models_directory}...')
     torch.hub._validate_not_a_forked_repo=lambda a,b,c: True
     for r, d, f in os.walk(models_directory):
         for file in f:
             if ".pt" in file:
-                # example: file = "model1.pt"
-                # the path of each model: os.path.join(r, file)
                 model_name = os.path.splitext(file)[0]
                 model_path = os.path.join(r, file)
+                # if model_name in dictOfModels:
+                #     old_model_path = getattr(dictOfModels[model_name], 'path', None)
+                #     if old_model_path == model_path:
+                #         continue
                 print(f'Loading model {model_path} with path {model_path}...')
                 dictOfModels[model_name] = torch.hub.load('ultralytics/yolov5', 'custom', path=model_path, force_reload=True)
-                # you would obtain: dictOfModels = {"model1" : model1 , etc}
-        for key in dictOfModels :
-            listOfKeys.append(key) # put all the keys in the listOfKeys
+        for key in dictOfModels:
+            listOfKeys.append(key)
 
+if __name__ == '__main__':
+    print('Starting yolov5 webservice...')
+    # Getting directory containing models from command args (or default 'models_train')
+
+    check_model()
+    t = threading.Thread(target=watch_models)
+    t.start()
     #print(f'Server now running on {os.environ["JOB_URL_SCHEME"]}{os.environ["JOB_ID"]}.{os.environ["JOB_HOST"]}')
     print('Server is now running')
     

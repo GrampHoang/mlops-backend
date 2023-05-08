@@ -21,3 +21,5 @@ flask_socketio
 flask-cors
 
 setuptools>=65.5.1
+
+watchdog
