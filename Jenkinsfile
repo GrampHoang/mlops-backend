@@ -30,7 +30,7 @@ pipeline {
         // Copy the Jenkins build number of Suite-Build job into a global iPension environment variable
         // MLOPS_TRAIN_NUMBER = "${env.BUILD_NUMBER}"
         VERSION_ = "${params.VERSION}"
-        ARCHIV = "${params.MODEL_NAME}"+'.tar.gz'
+        IMAGE_TO_PUSH="${MODEL_NAME}:${VERSION_}"
         SERVER_ID="Jfrog-mlops-model-store"
         DOCKER_REPO="mlops-docker-images"
         MODEL_RESULT = "mlops-trained-models"
@@ -55,22 +55,8 @@ pipeline {
                     }"""
                     def buildInfo = server.download(downloadSpec)
                     
-                    // Check if the file was downloaded successfully
-                    // def fileDownloaded = buildInfo.getDeployedArtifacts().find { it.getName() == '08052303.tar.gz' }
-                    // if (fileDownloaded) {
-                    //     echo "File was successfully downloaded from Artifactory"
-                    // } else {
-                    //     echo "Error: Failed to download file from Artifactory"
-                    // }
                 }
             }
-            // post {
-            //     success {
-            //         script { 
-            //             untar file: ARCHIV, dir: 'runs' 
-            //         }
-            //     }
-            // }
         }
 
 
@@ -85,39 +71,21 @@ pipeline {
             }
         }
 
-        // stage('Check') {
-        //     steps {
-        //         sh '''
-        //         cd models_train
-        //         ls
-        //         '''
-        //     }
-        // }
-
         stage('Build and Push Docker Image') {
             steps {
                 script {
                     // Build the Docker image
-                    sh 'docker build -t ${MODEL_NAME}:${VERSION_} .'
+                    sh 'docker build -t ${IMAGE_TO_PUSH} .'
                     
                     // Push the Docker image to Artifactory Docker repository
                     rtDockerPush(
                         serverId: SERVER_ID,
-                        image: '${MODEL_NAME}:${VERSION_}',
+                        image: IMAGE_TO_PUSH,
                         targetRepo: DOCKER_REPO
                     )
                 }
             }
         }
-
-        // stage('Deploy model'){
-        //     steps {
-        //         // sh  "docker ps | grep 9443 | awk '{print $1}' | xargs docker container stop"
-        //         sh '''
-        //             docker run -p 5000:5000 ${MODEL_NAME}
-        //         '''
-        //     }
-        // }
 
     }
     post {
