@@ -1,18 +1,61 @@
-apiVersion: apps/v1
+apiVersion: apps.openshift.io/v1
 kind: DeploymentConfig
 metadata:
-  name: myapp
+  name: backend-mlops
+  labels:
+    app: mlops-app
 spec:
   replicas: 1
   selector:
-    app: myapp
+    app: mlops-app
+    deploymentconfig: backend-mlops
+  strategy:
+    type: Rolling
+    rollingParams:
+      maxUnavailable: 25%
+      maxSurge: 25%
   template:
     metadata:
       labels:
-        app: myapp
+        app: mlops-app
+        deploymentconfig: backend-mlops
     spec:
       containers:
-        - name: myapp
-          image: <your-image>
-          ports:
-            - containerPort: 8080
+      - name: backend-mlops
+        image: artifactorymlopsk18.jfrog.io/mlops-docker-images/mlops-backend:08052314
+        imagePullPolicy: Always
+        resources:
+          limits:
+            cpu: '5'
+            memory: 2Gi
+          requests:
+            cpu: 2m
+            memory: 2Gi
+      imagePullSecrets:
+      - name: artifactory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-mlops-dc
+  labels:
+    app: mlops-app
+spec:
+  selector:
+    app: mlops-app
+    deploymentconfig: backend-mlops
+  ports:
+    - name: backend-mlops
+      port: 5000
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: backend-mlops-dc
+  labels:
+    app: mlops-app
+spec:
+      host: backend-mlops-prj.apps.sandbox-m3.1530.p1.openshiftapps.com
+      to:
+        kind: Service
+        name: backend-mlops-dc 

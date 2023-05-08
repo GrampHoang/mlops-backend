@@ -1,11 +1,27 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: myapp
+  name: frontend-mlops
+  labels:
+    app: mlops-app
 spec:
+  selector:
+    app: mlops-app
+    deploymentconfig: frontend-mlops
   ports:
     - name: http
-      port: 80
-      targetPort: 8080
-  selector:
-    app: myapp
+      port: 8008
+      targetPort: 8008
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Route
+metadata:
+  name: frontend-mlops
+  labels:
+    app: mlops-app
+spec:
+      host: frontend-mlops-prj.apps.sandbox-m3.1530.p1.openshiftapps.com
+      to:
+        kind: Service
+        name: frontend-mlops  
