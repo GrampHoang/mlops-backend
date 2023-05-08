@@ -13,6 +13,7 @@ pipeline {
 
     parameters {
         string(name: 'MODEL_NAME', description: 'The name for the model')
+        string(name: 'VERSION', description: 'The version for the model')
         // string(name: 'IMG', description: 'The image size for training. Example 480', defaultValue: "480")
         // string(name: 'BATCH', description: 'The number to build at a time. Example 1', defaultValue: "1")
         // string(name: 'EPOCH', description: 'The number of training for model. Example 1', defaultValue: "1")
@@ -28,7 +29,7 @@ pipeline {
     environment {
         // Copy the Jenkins build number of Suite-Build job into a global iPension environment variable
         // MLOPS_TRAIN_NUMBER = "${env.BUILD_NUMBER}"
-        VERSION_ = 'latest'
+        VERSION_ = "${params.VERSION}"
         ARCHIV = "${params.MODEL_NAME}"+'.tar.gz'
         // Define default job parameters
         propagate = true
