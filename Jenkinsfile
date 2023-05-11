@@ -30,7 +30,8 @@ pipeline {
         // Copy the Jenkins build number of Suite-Build job into a global iPension environment variable
         // MLOPS_TRAIN_NUMBER = "${env.BUILD_NUMBER}"
         VERSION_ = "${params.VERSION}"
-        IMAGE_TO_PUSH="${MODEL_NAME}:${VERSION_}"
+        BE_IMAGE_NAME="mlops-backend"
+        IMAGE_TO_PUSH="${BE_IMAGE_NAME}:${MODEL_NAME}"
         SERVER_ID="Jfrog-mlops-model-store"
         DOCKER_REPO="mlops-docker-images"
         MODEL_RESULT = "mlops-trained-models"
