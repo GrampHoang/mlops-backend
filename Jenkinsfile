@@ -67,7 +67,7 @@ pipeline {
                 cd ${MODEL_NAME}
                 chmod 777 "${VERSION_}.tar.gz"
                 tar -xvf "${VERSION_}.tar.gz"
-                mv train/exp/weights/last.pt ../models_train/"${MODEL_NAME}".pt
+                mv train/exp/weights/best.pt ../models_train/"${MODEL_NAME}".pt
                 '''
             }
         }
@@ -75,7 +75,6 @@ pipeline {
         stage('Build and Push Docker Image') {
             steps {
                 script {
-                    
                     
                     withCredentials([
                         usernamePassword(
