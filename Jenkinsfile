@@ -85,11 +85,18 @@ pipeline {
                         )
                     ]) {
                         // Build the Docker image
-                        sh "docker build -t ${IMAGE_TO_PUSH} ."
+                        sh "docker build -t artifactorymlopsk18.jfrog.io/${DOCKER_REPO}/${IMAGE_TO_PUSH} ."
                         sh "docker login -u ${USERNAME} -p ${PASSWORD} artifactorymlopsk18.jfrog.io"
 
-                        sh "docker tag ${IMAGE_TO_PUSH} artifactorymlopsk18.jfrog.io/${DOCKER_REPO}/${IMAGE_TO_PUSH}"
+                        // sh "docker tag ${IMAGE_TO_PUSH} artifactorymlopsk18.jfrog.io/${DOCKER_REPO}/${IMAGE_TO_PUSH}"
                         sh "docker push artifactorymlopsk18.jfrog.io/${DOCKER_REPO}/${IMAGE_TO_PUSH}"
+                    }
+                }
+            }
+            post {
+                success {
+                    script { 
+                        sh "docker image rm -f artifactorymlopsk18.jfrog.io/${DOCKER_REPO}/${IMAGE_TO_PUSH}" 
                     }
                 }
             }
