@@ -17,16 +17,16 @@ pipeline {
 
     environment {
 
-        def VERSION_ = "${params.VERSION}"
+        def VERSION_ = "latest"
         //Artifactory connect info
         def BE_IMAGE_NAME="mlops-backend"
         def SERVER_ID="Jfrog-mlops-model-store"
         def DOCKER_REPO="mlops-docker-images"
-        def MODEL_RESULT = "mlops-trained-models"
+        def MODEL_REPO = "mlops-trained-models"
 
         //Name and version of the backend image to be built
         def IMAGE_TO_PUSH="${BE_IMAGE_NAME}:${params.MODEL_NAME}"
-        def arrayInput
+        def model_list=""
         // Define default job parameters
         propagate = true
 
@@ -36,30 +36,38 @@ pipeline {
         stage('Process Input') {
             steps {
                 script {
-                    arrayInput = params.MODEL_NAME.split(',')
-                    echo "Array Values: ${arrayInput}"
-                    if (!params.VERSION_?.trim()) {
+                    if (!params.MODEL_NAME?.trim()) {
                         echo "MODEL_NAME is a mandatory parameter"
                         error "MODEL_NAME is a mandatory parameter"
                         return
                     }
+                    model_list = params.MODEL_NAME.split(',')
+                    echo "Model list: ${model_list}"
+                    
+                    
+                    if (params.VERSION?.trim()){
+                        VERSION_="${params.VERSION}"
+                    }
                 }
             }
         }
-        stage('Pull model result from Artifactory') {
+        stage('Pull model results from Artifactory') {
             steps {
                 script {
                     def server = Artifactory.server(SERVER_ID)
-                    def downloadSpec = """{
-                        "files": [
-                            {
-                                "pattern": "${MODEL_RESULT}/${MODEL_NAME}/${VERSION_}.tar.gz",
-                                "target": "./"
-                            }
-                        ]
-                    }"""
-                    def buildInfo = server.download(downloadSpec)
-                    
+                    for (def value in model_list) {
+                        echo "Download model: ${value}"                       
+                        // Perform the desired steps for each value
+                        def downloadSpec = """{
+                            "files": [
+                                {
+                                    "pattern": "${MODEL_REPO}/${value}/${VERSION_}.tar.gz",
+                                    "target": "./"
+                                }
+                            ]
+                        }"""
+                        def buildInfo = server.download(downloadSpec)
+                    }
                 }
             }
         }
@@ -67,12 +75,18 @@ pipeline {
 
         stage('Add model and results to Dockerfile') {
             steps {
-                sh '''
-                cd ${MODEL_NAME}
-                chmod 777 "${VERSION_}.tar.gz"
-                tar -xvf "${VERSION_}.tar.gz"
-                mv train/exp/weights/best.pt ../models_train/"${MODEL_NAME}".pt
-                '''
+                script {
+                    for (def value in model_list) {
+                        echo "Move model: ${value} to model_folder"                       
+                        // Perform the desired steps for each value
+                        sh '''
+                            cd ${MODEL_NAME}
+                            chmod 777 "${VERSION_}.tar.gz"
+                            tar -xvf "${VERSION_}.tar.gz"
+                            mv train/exp/weights/best.pt ../models_train/"${MODEL_NAME}".pt
+                        '''
+                    }
+                }
             }
         }
 
