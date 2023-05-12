@@ -25,7 +25,7 @@ pipeline {
         MODEL_RESULT = "mlops-trained-models"
 
         //Name and version of the backend image to be built
-        IMAGE_TO_PUSH="${BE_IMAGE_NAME}:${MODEL_NAME}"
+        IMAGE_TO_PUSH="${BE_IMAGE_NAME}:${params.MODEL_NAME}"
 
         // Define default job parameters
         propagate = true
@@ -33,6 +33,18 @@ pipeline {
     }
 
     stages {
+        stage('Process Input') {
+            steps {
+                script {
+                    def arrayInput = params.MODEL_NAME.split(',')
+                    echo "Array Values: ${arrayInput}"
+                    if (!params.VERSION_?.trim()) {
+                        error "MODEL_NAME is a mandatory parameter"
+                        return
+                    }
+                }
+            }
+        }
         stage('Pull model result from Artifactory') {
             steps {
                 script {
@@ -101,7 +113,7 @@ pipeline {
         failure {
             slackSend(color:"#ff0000",message: "To: <!channel|channel>, Build failed  - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)")
         }
-        
+
         always {
             cleanWs()
         }
