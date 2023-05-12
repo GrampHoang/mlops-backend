@@ -39,6 +39,7 @@ pipeline {
                     def arrayInput = params.MODEL_NAME.split(',')
                     echo "Array Values: ${arrayInput}"
                     if (!params.VERSION_?.trim()) {
+                        echo "MODEL_NAME is a mandatory parameter"
                         error "MODEL_NAME is a mandatory parameter"
                         return
                     }
