@@ -17,16 +17,16 @@ pipeline {
 
     environment {
 
-        VERSION_ = "${params.VERSION}"
+        def VERSION_ = "${params.VERSION}"
         //Artifactory connect info
-        BE_IMAGE_NAME="mlops-backend"
-        SERVER_ID="Jfrog-mlops-model-store"
-        DOCKER_REPO="mlops-docker-images"
-        MODEL_RESULT = "mlops-trained-models"
+        def BE_IMAGE_NAME="mlops-backend"
+        def SERVER_ID="Jfrog-mlops-model-store"
+        def DOCKER_REPO="mlops-docker-images"
+        def MODEL_RESULT = "mlops-trained-models"
 
         //Name and version of the backend image to be built
-        IMAGE_TO_PUSH="${BE_IMAGE_NAME}:${params.MODEL_NAME}"
-
+        def IMAGE_TO_PUSH="${BE_IMAGE_NAME}:${params.MODEL_NAME}"
+        def arrayInput
         // Define default job parameters
         propagate = true
 
@@ -36,7 +36,7 @@ pipeline {
         stage('Process Input') {
             steps {
                 script {
-                    def arrayInput = params.MODEL_NAME.split(',')
+                    arrayInput = params.MODEL_NAME.split(',')
                     echo "Array Values: ${arrayInput}"
                     if (!params.VERSION_?.trim()) {
                         echo "MODEL_NAME is a mandatory parameter"
