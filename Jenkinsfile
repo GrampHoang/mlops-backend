@@ -16,21 +16,23 @@ pipeline {
     }
 
     environment {
-        // Copy the Jenkins build number of Suite-Build job into a global iPension environment variable
-        // MLOPS_TRAIN_NUMBER = "${env.BUILD_NUMBER}"
+
         VERSION_ = "${params.VERSION}"
+        //Artifactory connect info
         BE_IMAGE_NAME="mlops-backend"
-        IMAGE_TO_PUSH="${BE_IMAGE_NAME}:${MODEL_NAME}"
         SERVER_ID="Jfrog-mlops-model-store"
         DOCKER_REPO="mlops-docker-images"
         MODEL_RESULT = "mlops-trained-models"
+
+        //Name and version of the backend image to be built
+        IMAGE_TO_PUSH="${BE_IMAGE_NAME}:${MODEL_NAME}"
+
         // Define default job parameters
         propagate = true
 
     }
 
     stages {
-        
         stage('Pull model result from Artifactory') {
             steps {
                 script {
