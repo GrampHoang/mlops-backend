@@ -1,7 +1,5 @@
 #!/usr/bin/env groovy
 
-
-
 pipeline {
     agent any
 
@@ -10,7 +8,7 @@ pipeline {
         string(name: 'VERSION', description: 'The version for the model')
     }
     options {
-        timeout(time: 1, unit: 'HOURS')
+        timeout(time: 3, unit: 'HOURS')
         timestamps()
         buildDiscarder(logRotator(numToKeepStr: '10'))
     }
@@ -27,6 +25,7 @@ pipeline {
         //Name and version of the backend image to be built
         def IMAGE_TO_PUSH="${BE_IMAGE_NAME}:${params.MODEL_NAME}"
         def model_list=""
+        def version_list=""
         // Define default job parameters
         propagate = true
 
@@ -46,7 +45,7 @@ pipeline {
                     
                     
                     if (params.VERSION?.trim()){
-                        VERSION_="${params.VERSION}"
+                        version_list = params.VERSION.split(',')
                     }
                 }
             }
