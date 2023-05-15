@@ -16,6 +16,14 @@ body {
   align-items: center;
 }
 
+.tophead{
+  height:127px;
+  width: 100%;
+  background-color: #4593C6;
+  justify-content: center;
+  align-items: center;
+}
+
 .mainscreen{
   width: 80%;
   height: 90%;
@@ -121,17 +129,27 @@ header {
   text-align: left;
   margin: 5px;
   padding: 5px;
-  width: 95%;
+  width: 100%;
   margin: 0 auto;
-  height: 100px;
+  height: 162px;
 }
 
 .incontainer{
   align-items: flex-start;
-  height: 70px;
+  height: 100px;
   width: 100%;
   padding: 1%;
   margin-bottom: 25px;
+}
+
+.sub_button{
+  background-color: #4593C6;
+  border-color: #FFFFFF;
+  box-shadow: 0px 0px 0px rgba(0, 0, 0, 0);
+  width: 80%;
+  height:70%;
+  margin-right: 100px;
+  text-align: center;
 }
 
 .outfield{
@@ -141,6 +159,7 @@ header {
   display: flex;
   justify-content: space-between; 
   align-items: center;
+  align-self: center;
   margin: 0 auto;
   height: 700px;
   width: 95%;
@@ -151,17 +170,15 @@ header {
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
   border-bottom: rgba(128, 128, 128, 0.3) 5px solid;
   border-radius: 3px;
+  display: flex;
   justify-content: center;
-  text-align: left;
-  /* background-color: #FFFFFF;
-  border-color: grey;
-  border-style: solid;
-  border-width: 1px; */
+  align-self: center;
   height: auto;
-  min-height: 100px;
-  max-height: 700px;
+  min-height: 600px;
+  max-height: 600px;
+  margin-top: 28px;
   width: auto;
-  min-width: 25%;
+  min-width: 75%;
   max-width: 75%;
 }
 
@@ -177,10 +194,8 @@ header {
   padding-left: 5px;
   padding-right: 5px;
   height: 680px;
-  /* min-height: 500px; */
   width: 25%;
   max-width:  25%;
-  /* max-height: 100%; */
 }
 
 .infoout_text{
@@ -227,7 +242,7 @@ body {
 form {
   text-align: left;
   height: 100%;
-  width: 85%;
+  width: 100%;
 }
 
 .container {

@@ -22,6 +22,6 @@ flask-cors
 
 setuptools>=65.5.1
 
-watchdog
+pymongo
 
 ultralytics

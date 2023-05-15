@@ -10,10 +10,7 @@ import os
 import json
 from flask_socketio import SocketIO
 import numpy as np
-import threading
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
-import time
+import pymongo
 from flask_cors import CORS
 # creating flask app
 
@@ -74,7 +71,8 @@ def predictnohtml():
         out_conf = conf_scores[i]
         output_str += f'{out_name}: {round(out_conf,3)}, {{({round(boxes[i][0])}, {round(boxes[i][1])}), ({round(boxes[i][2])}, {round(boxes[i][3])})}}\n'
         results_json.append({
-            "class": out_name,
+            "class": str(int(labels[i])),
+            "className": out_name,
             "confidence": float(out_conf),
             "topleft_x": boxes[i][0],
             "topleft_y": boxes[i][1],
@@ -97,7 +95,24 @@ def predictnohtml():
         'result_img': encoded_image_base64,
         'result_str': output_str_break
     })
-    response.headers.add('Access-Control-Allow-Origin', '*')
+    
+    # TODO
+    client = pymongo.MongoClient(
+        "mongodb+srv://haicauancarem:tiachop1@cluster0.dd88nyj.mongodb.net/?retryWrites=true&w=majority")
+    mydb = client["MLOpsData"]
+    weight = mydb["weight"]
+    monitoring = mydb["monitoring"]
+
+    deployedModel = weight.find({"modelName": model, "deployed": True})
+    temp = []
+    for element in deployedModel:
+        temp += [element["version"]]
+
+    for element in temp:
+        x = monitoring.insert_one({"modelName": model,
+                            "version": element, "monitorResult": json_out})
+
+    response.headers.add('Access-Control-Allow-Origin', '*')       
     return response
     
  
@@ -171,19 +186,8 @@ def extract_img(request):
         
     return file
 
-models_directory = '/workspace/models_train'
-
-def watch_models():
-    global models_directory
-    class MyHandler(FileSystemEventHandler):
-        def on_modified(self, event):
-            print(f'Models folder has been updated')
-            check_model()
-    event_handler = MyHandler()
-    observer = Observer()
-    observer.schedule(event_handler, models_directory, recursive=True)
-    observer.start()
-    print(f'Watching for yolov5 models under {models_directory}...')
+# models_directory = '/workspace/models_train'
+models_directory = 'models_train' #Run locally
 
 def check_model():
     global models_directory
@@ -195,10 +199,6 @@ def check_model():
             if ".pt" in file:
                 model_name = os.path.splitext(file)[0]
                 model_path = os.path.join(r, file)
-                # if model_name in dictOfModels:
-                #     old_model_path = getattr(dictOfModels[model_name], 'path', None)
-                #     if old_model_path == model_path:
-                #         continue
                 print(f'Loading model {model_path} with path {model_path}...')
                 dictOfModels[model_name] = torch.hub.load('ultralytics/yolov5', 'custom', path=model_path, force_reload=True)
         for key in dictOfModels:
@@ -206,14 +206,10 @@ def check_model():
 
 if __name__ == '__main__':
     print('Starting yolov5 webservice...')
-    # Getting directory containing models from command args (or default 'models_train')
-
     check_model()
-    t = threading.Thread(target=watch_models)
-    t.start()
     #print(f'Server now running on {os.environ["JOB_URL_SCHEME"]}{os.environ["JOB_ID"]}.{os.environ["JOB_HOST"]}')
     print('Server is now running')
     
     # starting app
-    socketio.run(app, debug=True, host='0.0.0.0', allow_unsafe_werkzeug=True)
+    socketio.run(app, debug=False, host='0.0.0.0', allow_unsafe_werkzeug=True)
     #app.run(debug=True,host='0.0.0.0')

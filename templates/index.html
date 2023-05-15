@@ -24,36 +24,52 @@
 	<body>
 		<!-- <form method=post enctype=multipart/form-data> -->
 			<form id = "myform">
-			<div style= "height:50px"></div>
+			<div class="tophead"><b><strong><div style="color: #FFFFFF;
+			padding-top: 25px;
+				font-style: normal;
+				font-weight: 700;
+				font-size: 60px;
+				line-height: 58px;
+				text-align: center;"> Object Detection Demo
+				</div></strong></b></div>
 			<div class="infield">
 				<div class="incontainer">
 					<!-- <h3 style= "color:#030d9b"><i></i></h3>
 					<hr> -->
 					<!-- <div style="height:50px"></div> -->
-					<h5>Choose image to detect: </h5>
+					<h3>Choose image to detect: </h3>
 					<input type="file" name="file" class="form-control-file" id="inputfile">
 				</div>
 				
 				<div class="incontainer">
 					<!-- <div style= "height:40px"></div> -->
-					<h5>Current model: </h5>
-					<select name="model_choice" id ="model_choice"></select>
+					<h3>Current model: </h3>
+					<select style="width: 30%; height: 60%;" name="model_choice" id ="model_choice"></select>
 				</div>
 				<!-- <div style= "height:50px"></div> -->
 				<!-- <div style= "margin-right:50px"> -->
-				<button class="btn btn-lg btn-primary btn-block" type="submit" style= "margin-right:10px" id="submit-btn">Submit</button>
+				<button class="sub_button" type="submit" style= "margin-right:10px" id="submit-btn">
+					<b><strong><div style="color: #FFFFFF;
+					font-style: normal;
+					font-weight: 700;
+					font-size: 48px;
+					line-height: 58px;
+					text-align: center;"> Submit
+					</div></strong></b>
+				</button>
 			</div>
+			<div style="position:absolute; left:50px; top: 320px; z-index: 1000;"><h3>Output image</h3></div>
+			<div style="height: 20px;"></div>
 			<div class="outfield">
-				<div style= "height:10px"></div>
 				<div class="imgout" id="imgOut">
-					<img id="ItemPreview" onerror="this.style.display='none'" style="height:auto; max-width: 80%; max-height: 800px; max-width: 900px; max-height: 658px;">
+					<img id="ItemPreview" onerror="this.style.display='none'" style="height:auto; max-width: 80%; max-height: 800px; max-width: 900px; max-height: 600px;">
 				</div>
 				<div class="infoout">
-					<h5>Detected objects:</h5>
+					<h3>Detected objects:</h3>
 					<div class="infoout_text">
 						<div style="display:none;" id="outstr">{{ output_str | safe}}</div>
 					</div>
-					<h5>JSON output:</h5>
+					<h3>JSON output:</h3>
 					<div class="infoout_json">
 						<pre style="display:none;" id="jsoninfo">{{ json_out }}</pre>
 					</div>
