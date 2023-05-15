@@ -186,8 +186,8 @@ def extract_img(request):
         
     return file
 
-models_directory = '/workspace/models_train'
-# models_directory = 'models_train' #Run locally
+# models_directory = '/workspace/models_train'
+models_directory = 'models_train' #Run locally
 
 def check_model():
     global models_directory
