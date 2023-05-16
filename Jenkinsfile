@@ -100,7 +100,7 @@ pipeline {
                     for (int i = 0; i < model_list.size(); i++) {
                         sh "echo Move model: ${model_list[i]} to model_folder"
                         sh '''
-                            cd ${model_list[i]}
+                            cd "${model_list[i]}"
                             chmod 777 "${version_list[i]}.tar.gz"
                             tar -xvf "${version_list[i]}.tar.gz"
                             mv train/exp/weights/best.pt ../models_train/"${model_list[i]}".pt
