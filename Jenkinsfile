@@ -72,79 +72,71 @@ pipeline {
                 }
             }
         }
-        // stage('Pull model results from Artifactory') {
-        //     steps {
-        //         script {
-        //             def server = Artifactory.server(SERVER_ID)
-        //             for (def value in model_list) {
-        //                 echo "Download model: ${value}"                       
-        //                 // Perform the desired steps for each value
-        //                 def downloadSpec = """{
-        //                     "files": [
-        //                         {
-        //                             "pattern": "${MODEL_REPO}/${value}/${VERSION_}.tar.gz",
-        //                             "target": "./"
-        //                         }
-        //                     ]
-        //                 }"""
-        //                 def buildInfo = server.download(downloadSpec)
-        //             }
-        //         }
-        //     }
-        // }
-        stage("test"){
+
+        stage('Pull model results from Artifactory') {
             steps {
                 script {
-                    echo "Model_array: ${model_list}"
+                    def server = Artifactory.server(SERVER_ID)
+                    for (int i = 0; i < model_list.size(); i++) {
+                        sh "echo Download model: ${model_list[i]} version: ${version_list[i]}"                       
+                        // Perform the desired steps for each value
+                        def downloadSpec = """{
+                            "files": [
+                                {
+                                    "pattern": "${MODEL_REPO}/${model_list[i]}/${version_list[i]}.tar.gz",
+                                    "target": "./"
+                                }
+                            ]
+                        }"""
+                        def buildInfo = server.download(downloadSpec)
+                    }
                 }
             }
         }
 
-        // stage('Add model and results to Dockerfile') {
-        //     steps {
-        //         script {
-        //             for (def value in model_list) {
-        //                 echo "Move model: ${value} to model_folder"                       
-        //                 // Perform the desired steps for each value
-        //                 sh '''
-        //                     cd ${MODEL_NAME}
-        //                     chmod 777 "${VERSION_}.tar.gz"
-        //                     tar -xvf "${VERSION_}.tar.gz"
-        //                     mv train/exp/weights/best.pt ../models_train/"${MODEL_NAME}".pt
-        //                 '''
-        //             }
-        //         }
-        //     }
-        // }
+        stage('Add model and results to Dockerfile') {
+            steps {
+                script {
+                    for (int i = 0; i < model_list.size(); i++) {
+                        sh "Move model: ${model_list[i]} to model_folder"
+                        sh '''
+                            cd ${MODEL_NAME}
+                            chmod 777 "${version_list[i]}.tar.gz"
+                            tar -xvf "${version_list[i]}.tar.gz"
+                            mv train/exp/weights/best.pt ../models_train/"${model_list[i]}".pt
+                        '''
+                    }
+                }
+            }
+        }
 
-        // stage('Build and Push Docker Image') {
-        //     steps {
-        //         script {
-                    
-        //             withCredentials([
-        //                 usernamePassword(
-        //                     credentialsId: 'artifactory_user',
-        //                     usernameVariable: 'USERNAME',
-        //                     passwordVariable: 'PASSWORD'
-        //                 )
-        //             ]) {
-        //                 // Build the Docker image
-        //                 sh "docker build -t artifactorymlopsk18.jfrog.io/${DOCKER_REPO}/${IMAGE_TO_PUSH} ."
-        //                 sh "docker login -u ${USERNAME} -p ${PASSWORD} artifactorymlopsk18.jfrog.io"
+        stage('Build and Push Docker Image') {
+            steps {
+                script {
+                    withCredentials([
+                        usernamePassword(
+                            credentialsId: 'artifactory_user',
+                            usernameVariable: 'USERNAME',
+                            passwordVariable: 'PASSWORD'
+                        )
+                    ]) {
+                        // Build the Docker image
+                        sh "docker build -t ${SERVER_URL}/${DOCKER_REPO}/${IMAGE_TO_PUSH} ."
+                        sh "docker login -u ${USERNAME} -p ${PASSWORD} ${SERVER_URL}"
 
-        //                 // sh "docker tag ${IMAGE_TO_PUSH} artifactorymlopsk18.jfrog.io/${DOCKER_REPO}/${IMAGE_TO_PUSH}"
-        //                 sh "docker push artifactorymlopsk18.jfrog.io/${DOCKER_REPO}/${IMAGE_TO_PUSH}"
-        //             }
-        //         }
-        //     }
-        //     post {
-        //         success {
-        //             script { 
-        //                 sh "docker image rm -f artifactorymlopsk18.jfrog.io/${DOCKER_REPO}/${IMAGE_TO_PUSH}" 
-        //             }
-        //         }
-        //     }
-        // }
+                        // sh "docker tag ${IMAGE_TO_PUSH} ${SERVER_URL}/${DOCKER_REPO}/${IMAGE_TO_PUSH}"
+                        sh "docker push ${SERVER_URL}/${DOCKER_REPO}/${IMAGE_TO_PUSH}"
+                    }
+                }
+            }
+            post {
+                success {
+                    script { 
+                        sh "docker image rm -f ${SERVER_URL}/${DOCKER_REPO}/${IMAGE_TO_PUSH}" 
+                    }
+                }
+            }
+        }
 
     }
     post {
