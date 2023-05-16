@@ -54,6 +54,7 @@ pipeline {
                     echo "Version list: ${version_list}"
                     if (model_list.size() == version_list.size()){
                         for (int i = 0; i < modelNamesList.size(); i++) {
+                            echo "aaaa"
                             def mergedElement = "${model_list[i]}:${version_list[i]}"
                             model_array.add(mergedElement)
                         }
