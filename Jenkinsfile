@@ -51,7 +51,7 @@ pipeline {
                     model_list = params.MODEL_NAME.split(',')
                     echo "Model list: ${model_list}"
                     version_list = params.MODEL_VERSION.split(',')
-                    echo "Version list: ${model_list}"
+                    echo "Version list: ${version_list}"
                     if (model_list.size() == version_list.size()){
                         for (int i = 0; i < modelNamesList.size(); i++) {
                             def mergedElement = "${model_list[i]}:${version_list[i]}"
