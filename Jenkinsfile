@@ -62,7 +62,7 @@ pipeline {
                             for (int i = 0; i < model_list.size(); i++) {
                                 // sh " curl -u ${USERNAME} -p ${PASSWORD} -f -I https://${SERVER_URL}/artifactory/${MODEL_REPO}/${model_list[i]}/${version_list[i]}.tar.gz"
                                 // sh "echo ${SERVER_URL}/artifactory/${MODEL_REPO}/${model_list[i]}/${version_list[i]}.tar.gz"
-                                sh "echo hi"
+                                sh "echo ${model_list[i]}"
                             }
                         } else {
                             echo "Models and versions is not equal"
