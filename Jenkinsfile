@@ -98,7 +98,7 @@ pipeline {
             steps {
                 script {
                     for (int i = 0; i < model_list.size(); i++) {
-                        sh "Move model: ${model_list[i]} to model_folder"
+                        sh "echo Move model: ${model_list[i]} to model_folder"
                         sh '''
                             cd ${MODEL_NAME}
                             chmod 777 "${version_list[i]}.tar.gz"
