@@ -27,7 +27,7 @@ pipeline {
         def IMAGE_TO_PUSH="${BE_IMAGE_NAME}:${params.IMAGE_NAME}"
         def model_list=""
         def version_list=""
-        def model_array=[]
+
         // Define default job parameters
         propagate = true
 
@@ -37,6 +37,7 @@ pipeline {
         stage('Process Input') {
             steps {
                 script {
+                    def model_array=[]
                     if (!params.MODEL_NAME?.trim()) {
                         echo "MODEL_NAME is a mandatory parameter"
                         error "MODEL_NAME is a mandatory parameter"
@@ -61,7 +62,7 @@ pipeline {
                         error "Exit process"
                         return
                     }
-                    echo "Model_array: ${model_array}"
+
                 }
             }
         }
@@ -85,7 +86,13 @@ pipeline {
         //         }
         //     }
         // }
-
+        stage("test"){
+            steps {
+                script {
+                    echo "Model_array: ${model_array}"
+                }
+            }
+        }
 
         // stage('Add model and results to Dockerfile') {
         //     steps {
