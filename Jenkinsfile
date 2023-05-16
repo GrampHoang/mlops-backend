@@ -18,6 +18,7 @@ pipeline {
 
         def VERSION_ = "latest"
         //Artifactory connect info
+        def SERSER_URL="artifactorymlopsk18.jfrog.io"
         def BE_IMAGE_NAME="mlops-backend"
         def SERVER_ID="Jfrog-mlops-model-store"
         def DOCKER_REPO="mlops-docker-images"
@@ -36,8 +37,15 @@ pipeline {
     stages {
         stage('Process Input') {
             steps {
-                script {
-                    def model_array=[]
+                script 
+                    withCredentials([
+                        usernamePassword(
+                            credentialsId: 'artifactory_user',
+                            usernameVariable: 'USERNAME',
+                            passwordVariable: 'PASSWORD'
+                        )
+                    ]){
+
                     if (!params.MODEL_NAME?.trim()) {
                         echo "MODEL_NAME is a mandatory parameter"
                         error "MODEL_NAME is a mandatory parameter"
@@ -49,21 +57,17 @@ pipeline {
                         return
                     }
                     model_list = params.MODEL_NAME.split(',')
-                    echo "Model list: ${model_array}"
                     version_list = params.MODEL_VERSION.split(',')
-                    echo "Version list: ${version_list[0]}"
-                    // if (model_list.size() == version_list.size()){
-                    //     for (int i = 0; i < modelNamesList.size(); i++) {
-                    //         echo "aaaa"
-                    //         def mergedElement = "${model_list[i]}:${version_list[i]}"
-                    //         model_array.add(mergedElement)
-                    //     }
-                    // } else {
-                    //     echo "Models and versions is not equal"
-                    //     error "Exit process"
-                    //     return
-                    // }
-                    echo "pass"
+                    echo "Checking model version on Artifactory"
+                    if (model_list.size() == version_list.size()){
+                        for (int i = 0; i < model_list.size(); i++) {
+                            sh " curl -u${USERNAME}:${PASSWORD} -f -I https://${SERVER_URL}/artifactory/${MODEL_REPO}/${model_list[i]}/${version_list[i]}.tar.gz"
+                        }
+                    } else {
+                        echo "Models and versions is not equal"
+                        error "Exit process"
+                        return
+                    }
                 }
             }
         }
@@ -90,7 +94,7 @@ pipeline {
         stage("test"){
             steps {
                 script {
-                    echo "Model_array: ${model_array}"
+                    echo "Model_array: ${model_list}"
                 }
             }
         }
