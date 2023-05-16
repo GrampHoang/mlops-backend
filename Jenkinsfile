@@ -45,7 +45,6 @@ pipeline {
                             passwordVariable: 'PASSWORD'
                         )
                     ]){
-
                         if (!params.MODEL_NAME?.trim()) {
                             echo "MODEL_NAME is a mandatory parameter"
                             error "MODEL_NAME is a mandatory parameter"
@@ -61,7 +60,7 @@ pipeline {
                         echo "Checking model version on Artifactory"
                         if (model_list.size() == version_list.size()){
                             for (int i = 0; i < model_list.size(); i++) {
-                                sh " curl -u${USERNAME}:${PASSWORD} -f -I https://${SERVER_URL}/artifactory/${MODEL_REPO}/${model_list[i]}/${version_list[i]}.tar.gz"
+                                sh " curl -u ${USERNAME} -p ${PASSWORD} -f -I https://${SERVER_URL}/artifactory/${MODEL_REPO}/${model_list[i]}/${version_list[i]}.tar.gz"
                             }
                         } else {
                             echo "Models and versions is not equal"
