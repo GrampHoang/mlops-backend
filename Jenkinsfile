@@ -51,7 +51,7 @@ pipeline {
                     model_list = params.MODEL_NAME.split(',')
                     echo "Model list: ${model_array}"
                     version_list = params.MODEL_VERSION.split(',')
-                    echo "Version list: ${version_list.size()}"
+                    echo "Version list: ${version_list[0]}"
                     // if (model_list.size() == version_list.size()){
                     //     for (int i = 0; i < modelNamesList.size(); i++) {
                     //         echo "aaaa"
