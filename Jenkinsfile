@@ -37,7 +37,7 @@ pipeline {
     stages {
         stage('Process Input') {
             steps {
-                script 
+                script {
                     withCredentials([
                         usernamePassword(
                             credentialsId: 'artifactory_user',
