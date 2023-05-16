@@ -5,7 +5,8 @@ pipeline {
 
     parameters {
         string(name: 'MODEL_NAME', description: 'The name for the model')
-        string(name: 'VERSION', description: 'The version for the model')
+        string(name: 'MODEL_VERSION', description: 'The version for the model')
+        string(name: 'IMAGE_NAME', description: 'The version for the model',defaultValue: "currentDeploy")
     }
     options {
         timeout(time: 3, unit: 'HOURS')
@@ -23,9 +24,10 @@ pipeline {
         def MODEL_REPO = "mlops-trained-models"
 
         //Name and version of the backend image to be built
-        def IMAGE_TO_PUSH="${BE_IMAGE_NAME}:${params.MODEL_NAME}"
+        def IMAGE_TO_PUSH="${BE_IMAGE_NAME}:${params.IMAGE_NAME}"
         def model_list=""
         def version_list=""
+        def model_array=[]
         // Define default job parameters
         propagate = true
 
@@ -40,83 +42,96 @@ pipeline {
                         error "MODEL_NAME is a mandatory parameter"
                         return
                     }
+                    if (!params.VERSION?.trim()) {
+                        echo "VERSION is a mandatory parameter"
+                        error "VERSION is a mandatory parameter"
+                        return
+                    }
                     model_list = params.MODEL_NAME.split(',')
                     echo "Model list: ${model_list}"
+                    version_list = params.VERSION.split(',')
+                    echo "Version list: ${model_list}"
+                    if (model_list.size() == version_list.size()){
+                        for (int i = 0; i < modelNamesList.size(); i++) {
+                            def mergedElement = "${model_list[i]}:${version_list[i]}"
+                            model_array.add(mergedElement)
+                        }
+                    } else {
+                        echo "Models and versions is not equal"
+                        error "Exit process"
+                        return
+                    }
+                    echo "Model_array: ${model_array}"
+                }
+            }
+        }
+        // stage('Pull model results from Artifactory') {
+        //     steps {
+        //         script {
+        //             def server = Artifactory.server(SERVER_ID)
+        //             for (def value in model_list) {
+        //                 echo "Download model: ${value}"                       
+        //                 // Perform the desired steps for each value
+        //                 def downloadSpec = """{
+        //                     "files": [
+        //                         {
+        //                             "pattern": "${MODEL_REPO}/${value}/${VERSION_}.tar.gz",
+        //                             "target": "./"
+        //                         }
+        //                     ]
+        //                 }"""
+        //                 def buildInfo = server.download(downloadSpec)
+        //             }
+        //         }
+        //     }
+        // }
+
+
+        // stage('Add model and results to Dockerfile') {
+        //     steps {
+        //         script {
+        //             for (def value in model_list) {
+        //                 echo "Move model: ${value} to model_folder"                       
+        //                 // Perform the desired steps for each value
+        //                 sh '''
+        //                     cd ${MODEL_NAME}
+        //                     chmod 777 "${VERSION_}.tar.gz"
+        //                     tar -xvf "${VERSION_}.tar.gz"
+        //                     mv train/exp/weights/best.pt ../models_train/"${MODEL_NAME}".pt
+        //                 '''
+        //             }
+        //         }
+        //     }
+        // }
+
+        // stage('Build and Push Docker Image') {
+        //     steps {
+        //         script {
                     
-                    
-                    if (params.VERSION?.trim()){
-                        version_list = params.VERSION.split(',')
-                    }
-                }
-            }
-        }
-        stage('Pull model results from Artifactory') {
-            steps {
-                script {
-                    def server = Artifactory.server(SERVER_ID)
-                    for (def value in model_list) {
-                        echo "Download model: ${value}"                       
-                        // Perform the desired steps for each value
-                        def downloadSpec = """{
-                            "files": [
-                                {
-                                    "pattern": "${MODEL_REPO}/${value}/${VERSION_}.tar.gz",
-                                    "target": "./"
-                                }
-                            ]
-                        }"""
-                        def buildInfo = server.download(downloadSpec)
-                    }
-                }
-            }
-        }
+        //             withCredentials([
+        //                 usernamePassword(
+        //                     credentialsId: 'artifactory_user',
+        //                     usernameVariable: 'USERNAME',
+        //                     passwordVariable: 'PASSWORD'
+        //                 )
+        //             ]) {
+        //                 // Build the Docker image
+        //                 sh "docker build -t artifactorymlopsk18.jfrog.io/${DOCKER_REPO}/${IMAGE_TO_PUSH} ."
+        //                 sh "docker login -u ${USERNAME} -p ${PASSWORD} artifactorymlopsk18.jfrog.io"
 
-
-        stage('Add model and results to Dockerfile') {
-            steps {
-                script {
-                    for (def value in model_list) {
-                        echo "Move model: ${value} to model_folder"                       
-                        // Perform the desired steps for each value
-                        sh '''
-                            cd ${MODEL_NAME}
-                            chmod 777 "${VERSION_}.tar.gz"
-                            tar -xvf "${VERSION_}.tar.gz"
-                            mv train/exp/weights/best.pt ../models_train/"${MODEL_NAME}".pt
-                        '''
-                    }
-                }
-            }
-        }
-
-        stage('Build and Push Docker Image') {
-            steps {
-                script {
-                    
-                    withCredentials([
-                        usernamePassword(
-                            credentialsId: 'artifactory_user',
-                            usernameVariable: 'USERNAME',
-                            passwordVariable: 'PASSWORD'
-                        )
-                    ]) {
-                        // Build the Docker image
-                        sh "docker build -t artifactorymlopsk18.jfrog.io/${DOCKER_REPO}/${IMAGE_TO_PUSH} ."
-                        sh "docker login -u ${USERNAME} -p ${PASSWORD} artifactorymlopsk18.jfrog.io"
-
-                        // sh "docker tag ${IMAGE_TO_PUSH} artifactorymlopsk18.jfrog.io/${DOCKER_REPO}/${IMAGE_TO_PUSH}"
-                        sh "docker push artifactorymlopsk18.jfrog.io/${DOCKER_REPO}/${IMAGE_TO_PUSH}"
-                    }
-                }
-            }
-            post {
-                success {
-                    script { 
-                        sh "docker image rm -f artifactorymlopsk18.jfrog.io/${DOCKER_REPO}/${IMAGE_TO_PUSH}" 
-                    }
-                }
-            }
-        }
+        //                 // sh "docker tag ${IMAGE_TO_PUSH} artifactorymlopsk18.jfrog.io/${DOCKER_REPO}/${IMAGE_TO_PUSH}"
+        //                 sh "docker push artifactorymlopsk18.jfrog.io/${DOCKER_REPO}/${IMAGE_TO_PUSH}"
+        //             }
+        //         }
+        //     }
+        //     post {
+        //         success {
+        //             script { 
+        //                 sh "docker image rm -f artifactorymlopsk18.jfrog.io/${DOCKER_REPO}/${IMAGE_TO_PUSH}" 
+        //             }
+        //         }
+        //     }
+        // }
 
     }
     post {
