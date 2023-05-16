@@ -62,7 +62,7 @@ pipeline {
                         error "Exit process"
                         return
                     }
-
+                    echo "pass"
                 }
             }
         }
