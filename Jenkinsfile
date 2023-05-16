@@ -43,14 +43,14 @@ pipeline {
                         error "MODEL_NAME is a mandatory parameter"
                         return
                     }
-                    if (!params.VERSION?.trim()) {
-                        echo "VERSION is a mandatory parameter"
-                        error "VERSION is a mandatory parameter"
+                    if (!params.MODEL_VERSION?.trim()) {
+                        echo "MODEL_VERSION is a mandatory parameter"
+                        error "MODEL_VERSION is a mandatory parameter"
                         return
                     }
                     model_list = params.MODEL_NAME.split(',')
                     echo "Model list: ${model_list}"
-                    version_list = params.VERSION.split(',')
+                    version_list = params.MODEL_VERSION.split(',')
                     echo "Version list: ${model_list}"
                     if (model_list.size() == version_list.size()){
                         for (int i = 0; i < modelNamesList.size(); i++) {
