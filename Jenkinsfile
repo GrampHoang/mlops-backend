@@ -18,7 +18,7 @@ pipeline {
 
         def VERSION_ = "latest"
         //Artifactory connect info
-        def SERSER_URL="artifactorymlopsk18.jfrog.io"
+        def SERVER_URL="artifactorymlopsk18.jfrog.io"
         def BE_IMAGE_NAME="mlops-backend"
         def SERVER_ID="Jfrog-mlops-model-store"
         def DOCKER_REPO="mlops-docker-images"
@@ -60,9 +60,7 @@ pipeline {
                         echo "Checking model version on Artifactory"
                         if (model_list.size() == version_list.size()){
                             for (int i = 0; i < model_list.size(); i++) {
-                                // sh " curl -u ${USERNAME} -p ${PASSWORD} -f -I https://${SERVER_URL}/artifactory/${MODEL_REPO}/${model_list[i]}/${version_list[i]}.tar.gz"
-                                // sh "echo ${SERVER_URL}/artifactory/${MODEL_REPO}/${model_list[i]}/${version_list[i]}.tar.gz"
-                                sh "echo ${model_list[i]}"
+                                sh "curl -u ${USERNAME} -p ${PASSWORD} -f -I https://${SERVER_URL}/artifactory/${MODEL_REPO}/${model_list[i]}/${version_list[i]}.tar.gz"
                             }
                         } else {
                             echo "Models and versions is not equal"
