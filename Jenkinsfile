@@ -40,7 +40,7 @@ pipeline {
                 script {
                     withCredentials([
                         usernamePassword(
-                            credentialsId: 'artifactory_user',
+                            credentialsId: 'artifactory-chih',
                             usernameVariable: 'USERNAME',
                             passwordVariable: 'PASSWORD'
                         )
