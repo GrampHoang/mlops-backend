@@ -18,7 +18,6 @@ pipeline {
 
         def VERSION_ = "latest"
         //Artifactory connect info
-        def SERVER_URL="artifactorymlopsk18.jfrog.io"
         def BE_IMAGE_NAME="mlops-backend"
         def SERVER_ID="Jfrog-mlops-model-store"
         def DOCKER_REPO="mlops-docker-images"
@@ -61,7 +60,7 @@ pipeline {
                         if (model_list.size() == version_list.size()){
                             for (int i = 0; i < model_list.size(); i++) {
                                 sh "echo Checking on model: ${model_list[i]} version: ${version_list[i]}"
-                                sh "curl -u ${USERNAME}:${PASSWORD} -f -I https://${SERVER_URL}/artifactory/${MODEL_REPO}/${model_list[i]}/${version_list[i]}.tar.gz"
+                                sh "curl -u ${USERNAME}:${PASSWORD} -f -I https://${env.SERVER_URL}/artifactory/${MODEL_REPO}/${model_list[i]}/${version_list[i]}.tar.gz"
                             }
                         } else {
                             echo "Models and versions is not equal"
@@ -121,18 +120,18 @@ pipeline {
                         )
                     ]) {
                         // Build the Docker image
-                        sh "docker build -t ${SERVER_URL}/${DOCKER_REPO}/${IMAGE_TO_PUSH} ."
-                        sh "docker login -u ${USERNAME} -p ${PASSWORD} ${SERVER_URL}"
+                        sh "docker build -t ${env.SERVER_URL}/${DOCKER_REPO}/${IMAGE_TO_PUSH} ."
+                        sh "docker login -u ${USERNAME} -p ${PASSWORD} ${env.SERVER_URL}"
 
-                        // sh "docker tag ${IMAGE_TO_PUSH} ${SERVER_URL}/${DOCKER_REPO}/${IMAGE_TO_PUSH}"
-                        sh "docker push ${SERVER_URL}/${DOCKER_REPO}/${IMAGE_TO_PUSH}"
+                        // sh "docker tag ${IMAGE_TO_PUSH} ${env.SERVER_URL}/${DOCKER_REPO}/${IMAGE_TO_PUSH}"
+                        sh "docker push ${env.SERVER_URL}/${DOCKER_REPO}/${IMAGE_TO_PUSH}"
                     }
                 }
             }
             post {
                 success {
                     script { 
-                        sh "docker image rm -f ${SERVER_URL}/${DOCKER_REPO}/${IMAGE_TO_PUSH}" 
+                        sh "docker image rm -f ${env.SERVER_URL}/${DOCKER_REPO}/${IMAGE_TO_PUSH}" 
                     }
                 }
             }
