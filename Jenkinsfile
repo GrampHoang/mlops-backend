@@ -1,4 +1,5 @@
 #!/usr/bin/env groovy
+library 'mlops-shared-lib'
 
 pipeline {
     agent any
