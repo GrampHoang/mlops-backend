@@ -52,6 +52,12 @@ pipeline {
                             error "MODEL_VERSION is a mandatory parameter"
                             return
                         }
+
+                        //Checking semantic for params
+                        semanticVersionCheck(this,params.MODEL_NAME)
+                        semanticVersionCheck(this,params.MODEL_VERSION)
+                        
+                        //Parse model version to build image
                         model_list = params.MODEL_NAME.split(',')
                         version_list = params.MODEL_VERSION.split(',')
                         echo "Checking model version on Artifactory"
