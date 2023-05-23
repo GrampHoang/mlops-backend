@@ -15,8 +15,6 @@ pipeline {
     }
 
     environment {
-
-        def VERSION_ = "latest"
         //Artifactory connect info
         def BE_IMAGE_NAME="mlops-backend"
         def SERVER_ID="Jfrog-mlops-model-store"
