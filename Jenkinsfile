@@ -19,8 +19,6 @@ pipeline {
         //Artifactory connect info
         def BE_IMAGE_NAME="mlops-backend"
         def SERVER_ID="Jfrog-mlops-model-store"
-        def DOCKER_REPO="mlops-docker-images"
-        def MODEL_REPO = "mlops-trained-models"
 
         //Name and version of the backend image to be built
         def IMAGE_TO_PUSH="${BE_IMAGE_NAME}:${params.IMAGE_NAME}"
@@ -57,6 +55,7 @@ pipeline {
                         //Checking semantic for params
                         semanticVersionCheck(this,params.MODEL_NAME)
                         semanticVersionCheck(this,params.MODEL_VERSION)
+                        semanticVersionCheck(this,params.IMAGE_NAME)
                         
                         //Parse model version to build image
                         model_list = params.MODEL_NAME.split(',')
@@ -65,7 +64,7 @@ pipeline {
                         if (model_list.size() == version_list.size()){
                             for (int i = 0; i < model_list.size(); i++) {
                                 sh "echo Checking on model: ${model_list[i]} version: ${version_list[i]}"
-                                sh "curl -u ${USERNAME}:${PASSWORD} -f -I https://${env.SERVER_URL}/artifactory/${MODEL_REPO}/${model_list[i]}/${version_list[i]}.tar.gz"
+                                sh "curl -u ${USERNAME}:${PASSWORD} -f -I https://${env.SERVER_URL}/artifactory/${env.MODEL_REPO}/${model_list[i]}/${version_list[i]}.tar.gz"
                             }
                         } else {
                             echo "Models and versions is not equal"
@@ -87,7 +86,7 @@ pipeline {
                         def downloadSpec = """{
                             "files": [
                                 {
-                                    "pattern": "${MODEL_REPO}/${model_list[i]}/${version_list[i]}.tar.gz",
+                                    "pattern": "${env.MODEL_REPO}/${model_list[i]}/${version_list[i]}.tar.gz",
                                     "target": "./"
                                 }
                             ]
@@ -125,18 +124,18 @@ pipeline {
                         )
                     ]) {
                         // Build the Docker image
-                        sh "docker build -t ${env.SERVER_URL}/${DOCKER_REPO}/${IMAGE_TO_PUSH} ."
+                        sh "docker build -t ${env.SERVER_URL}/${env.DOCKER_REPO}/${IMAGE_TO_PUSH} ."
                         sh "docker login -u ${USERNAME} -p ${PASSWORD} ${env.SERVER_URL}"
 
-                        // sh "docker tag ${IMAGE_TO_PUSH} ${env.SERVER_URL}/${DOCKER_REPO}/${IMAGE_TO_PUSH}"
-                        sh "docker push ${env.SERVER_URL}/${DOCKER_REPO}/${IMAGE_TO_PUSH}"
+                        // sh "docker tag ${IMAGE_TO_PUSH} ${env.SERVER_URL}/${env.DOCKER_REPO}/${IMAGE_TO_PUSH}"
+                        sh "docker push ${env.SERVER_URL}/${env.DOCKER_REPO}/${IMAGE_TO_PUSH}"
                     }
                 }
             }
             post {
                 success {
                     script { 
-                        sh "docker image rm -f ${env.SERVER_URL}/${DOCKER_REPO}/${IMAGE_TO_PUSH}" 
+                        sh "docker image rm -f ${env.SERVER_URL}/${env.DOCKER_REPO}/${IMAGE_TO_PUSH}" 
                     }
                 }
             }
