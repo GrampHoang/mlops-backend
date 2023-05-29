@@ -12,6 +12,8 @@ from flask_socketio import SocketIO
 import numpy as np
 import pymongo
 from flask_cors import CORS
+import time
+from datetime import datetime
 # creating flask app
 
 FLASK_RUN_RELOAD = False
@@ -53,6 +55,8 @@ def getModel():
 
 @app.route('/predict', methods=['POST'])
 def predictnohtml():
+    start = time.perf_counter()
+
     if 'file' not in request.files:
         return jsonify({'error': 'No file uploaded'})
     file = request.files['file']
@@ -66,6 +70,10 @@ def predictnohtml():
    
     output_str = ''
     results_json = []
+    current_datetime = datetime.now()
+    formatted_datetime = current_datetime.strftime("%d/%m/%Y-%H:%M:%S")
+    request_time = time.perf_counter() - start
+    
     for i in range(len(labels)):
         out_name = results.names[int(labels[i])].capitalize()
         out_conf = conf_scores[i]
@@ -77,7 +85,9 @@ def predictnohtml():
             "topleft_x": boxes[i][0],
             "topleft_y": boxes[i][1],
             "bottomright_x": boxes[i][2],
-            "bottomright_y": boxes[i][3]
+            "bottomright_y": boxes[i][3],
+            "date": formatted_datetime,
+            "response_time": str(round(request_time,3)) + "ms"
         })
     output_str_break = output_str.replace("\n", "<br>")
     json_out  = json.dumps(results_json, indent=2)
@@ -89,7 +99,6 @@ def predictnohtml():
         im_arr = cv2.imencode('.jpg', RGB_img)[1]
 
         encoded_image_base64 = base64.b64encode(im_arr.tobytes()).decode('utf-8')
-    
     response = jsonify({
         'results': json_out,
         'result_img': encoded_image_base64,
@@ -119,6 +128,7 @@ def predictnohtml():
 # post method
 @app.route('/', methods=['POST'])
 def predict():
+    start = time.perf_counter()
     file = extract_img(request)
     img_bytes = file.read()
     
@@ -133,6 +143,9 @@ def predict():
     # create string with class and coordinates
     output_str = ''
     results_json = []
+    current_datetime = datetime.now()
+    formatted_datetime = current_datetime.strftime("%d/%m/%Y-%H:%M:%S")
+    request_time = time.perf_counter() - start
     for i in range(len(labels)):
         out_name = results.names[int(labels[i])].capitalize()
         out_conf = conf_scores[i]
@@ -141,7 +154,9 @@ def predict():
             "class": out_name,
             "confidence": float(out_conf),
             "topleft": boxes[i][0],
-            "bottomright": boxes[i][3]
+            "bottomright": boxes[i][3],
+            "date": formatted_datetime,
+            "response_time": str(round(request_time,3)) + "ms"
         })
 
     output_str_break = output_str.replace("\n", "<br>")
@@ -160,19 +175,19 @@ def predict():
     return render_template("index.html", len = len(listOfKeys), listOfKeys = listOfKeys, responsed = encoded_image_base64, output_str=output_str_break, json_out=json_out)
     # return response
 
-@socketio.on('frame')
-def process_frame(frame, model):
-    # Convert base64 string to numpy array
-    imgdata = base64.b64decode(frame.split(',')[1])
-    img_real = Image.open(io.BytesIO(imgdata))
-    results = dictOfModels[model](img_real, size = 640)
-    results.render()
-    for img in results.ims:
-        RGB_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        im_arr = cv2.imencode('.jpg', RGB_img)[1]
-    data = base64.b64encode(im_arr).decode('utf-8')
-    # Send processed frame back to frontend
-    socketio.emit('processed_frame', f"data:image/webp;base64,{data}")
+# @socketio.on('frame')
+# def process_frame(frame, model):
+#     # Convert base64 string to numpy array
+#     imgdata = base64.b64decode(frame.split(',')[1])
+#     img_real = Image.open(io.BytesIO(imgdata))
+#     results = dictOfModels[model](img_real, size = 640)
+#     results.render()
+#     for img in results.ims:
+#         RGB_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+#         im_arr = cv2.imencode('.jpg', RGB_img)[1]
+#     data = base64.b64encode(im_arr).decode('utf-8')
+#     # Send processed frame back to frontend
+#     socketio.emit('processed_frame', f"data:image/webp;base64,{data}")
 
 def extract_img(request):
     # checking if image uploaded is valid
