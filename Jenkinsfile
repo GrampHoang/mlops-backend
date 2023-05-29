@@ -135,7 +135,7 @@ pipeline {
             post {
                 success {
                     script {
-                        sh "python InsertDeployedModel.py --modelListName ${params.MODEL_NAME} --versionList ${params.MODEL_VERSION} --image ${params.IMAGE_NAME}"
+                        sh "python3 InsertDeployedModel.py --modelListName ${params.MODEL_NAME} --versionList ${params.MODEL_VERSION} --image ${params.IMAGE_NAME}"
                         sh "docker image rm -f ${env.SERVER_URL}/${env.DOCKER_REPO}/${IMAGE_TO_PUSH}" 
                     }
                 }
