@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
       - name: backend-mlops
-        image: artifactorymlopsk18.jfrog.io/mlops-docker-images/mlops-backend:deployedImage4
+        image: artifactorymlopsdemo.jfrog.io/mlops-docker-images/mlops-backend:deployedImage7
         imagePullPolicy: Always
         resources:
           limits:
