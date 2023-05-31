@@ -5,7 +5,7 @@ metadata:
   labels:
     app: mlops-app
 spec:
-      host: http://backend-mlops-production.apps.sandbox-m2.ll9k.p1.openshiftapps.com
+      host: backend-mlops-production.apps.sandbox-m2.ll9k.p1.openshiftapps.com
       to:
         kind: Service
         name: backend-mlops-dc 
